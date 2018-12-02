@@ -1,0 +1,38 @@
+{
+  "name": "ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "@azure/cosmos-language-service": "^0.0.1",
+    "ace-builds": "^1.4.2",
+    "codemirror": "^5.42.0",
+    "element-ui": "^2.4.5",
+    "eventemitter3": "^3.1.0",
+    "monaco-editor": "0.15.6",
+    "vue": "^2.5.17",
+    "vue-grid-layout": "^2.3.1",
+    "vue-router": "^3.0.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.2.0",
+    "@vue/cli-plugin-typescript": "^3.2.0",
+    "@vue/cli-service": "^3.2.0",
+    "typescript": "^3.0.0",
+    "vue-cli-plugin-element": "^1.0.0",
+    "vue-template-compiler": "^2.5.17"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
