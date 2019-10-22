@@ -138,7 +138,7 @@ func (s *testEvaluatorSuite) TestCompare(c *C) {
 	}
 
 	for _, t := range tests {
-		bf, err := funcs[t.funcName].getFunction(s.ctx, s.primitiveValsToConstants([]interface{}{t.arg0, t.arg1}))
+		bf, err := funcs[t.funcName].GetFunction(s.ctx, s.primitiveValsToConstants([]interface{}{t.arg0, t.arg1}))
 		c.Assert(err, IsNil)
 		args := bf.getArgs()
 		c.Assert(args[0].GetType().Tp, Equals, t.tp)
@@ -151,7 +151,7 @@ func (s *testEvaluatorSuite) TestCompare(c *C) {
 
 	// test <non-const decimal expression> <cmp> <const string expression>
 	decimalCol, stringCon := &Column{RetType: types.NewFieldType(mysql.TypeNewDecimal)}, &Constant{RetType: types.NewFieldType(mysql.TypeVarchar)}
-	bf, err := funcs[ast.LT].getFunction(s.ctx, []Expression{decimalCol, stringCon})
+	bf, err := funcs[ast.LT].GetFunction(s.ctx, []Expression{decimalCol, stringCon})
 	c.Assert(err, IsNil)
 	args := bf.getArgs()
 	c.Assert(args[0].GetType().Tp, Equals, mysql.TypeNewDecimal)
@@ -159,7 +159,7 @@ func (s *testEvaluatorSuite) TestCompare(c *C) {
 
 	// test <time column> <cmp> <non-time const>
 	timeCol := &Column{RetType: types.NewFieldType(mysql.TypeDatetime)}
-	bf, err = funcs[ast.LT].getFunction(s.ctx, []Expression{timeCol, stringCon})
+	bf, err = funcs[ast.LT].GetFunction(s.ctx, []Expression{timeCol, stringCon})
 	c.Assert(err, IsNil)
 	args = bf.getArgs()
 	c.Assert(args[0].GetType().Tp, Equals, mysql.TypeDatetime)
@@ -207,7 +207,7 @@ func (s *testEvaluatorSuite) TestCoalesce(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Length].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Length].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -246,7 +246,7 @@ func (s *testEvaluatorSuite) TestIntervalFunc(c *C) {
 		{types.MakeDatums("9007199254740992", "9007199254740993"), 1},
 	} {
 		fc := funcs[ast.Interval]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t.args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t.args))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -332,8 +332,8 @@ func (s *testEvaluatorSuite) TestGreatestLeastFuncs(c *C) {
 			}
 		}
 	}
-	_, err := funcs[ast.Greatest].getFunction(s.ctx, []Expression{Zero, One})
+	_, err := funcs[ast.Greatest].GetFunction(s.ctx, []Expression{Zero, One})
 	c.Assert(err, IsNil)
-	_, err = funcs[ast.Least].getFunction(s.ctx, []Expression{Zero, One})
+	_, err = funcs[ast.Least].GetFunction(s.ctx, []Expression{Zero, One})
 	c.Assert(err, IsNil)
 }

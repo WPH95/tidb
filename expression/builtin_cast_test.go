@@ -318,7 +318,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		sc.IgnoreTruncate = originIgnoreTruncate
 		sc.TimeZone = originTZ
 	}()
-	var sig builtinFunc
+	var sig BuiltinFunc
 
 	durationColumn := &Column{RetType: types.NewFieldType(mysql.TypeDuration), Index: 0}
 	durationColumn.RetType.Decimal = int(types.DefaultFsp)
@@ -362,7 +362,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 	for i, t := range castToDecCases {
 		args := []Expression{t.before}
 		decFunc := newBaseBuiltinCastFunc(newBaseBuiltinFunc(ctx, args), false)
-		decFunc.tp = types.NewFieldType(mysql.TypeNewDecimal)
+		decFunc.Tp = types.NewFieldType(mysql.TypeNewDecimal)
 		switch i {
 		case 0:
 			sig = &builtinCastIntAsDecimalSig{decFunc}
@@ -446,7 +446,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(mysql.TypeNewDecimal)
 		tp.Flen, tp.Decimal = t.flen, t.decimal
 		decFunc := newBaseBuiltinCastFunc(newBaseBuiltinFunc(ctx, args), false)
-		decFunc.tp = tp
+		decFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastIntAsDecimalSig{decFunc}
@@ -654,7 +654,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp.Charset = charset.CharsetBin
 		args := []Expression{t.before}
 		stringFunc := newBaseBuiltinFunc(ctx, args)
-		stringFunc.tp = tp
+		stringFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsStringSig{stringFunc}
@@ -671,7 +671,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		case 6:
 			sig = &builtinCastStringAsStringSig{stringFunc}
 		}
-		res, isNull, err := sig.evalString(t.row.ToRow())
+		res, isNull, err := sig.EvalString(t.row.ToRow())
 		c.Assert(isNull, Equals, false)
 		c.Assert(err, IsNil)
 		c.Assert(res, Equals, t.after)
@@ -732,7 +732,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(mysql.TypeVarString)
 		tp.Flen, tp.Charset = t.flen, charset.CharsetBin
 		stringFunc := newBaseBuiltinFunc(ctx, args)
-		stringFunc.tp = tp
+		stringFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsStringSig{stringFunc}
@@ -745,10 +745,10 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		case 4:
 			sig = &builtinCastDurationAsStringSig{stringFunc}
 		case 5:
-			stringFunc.tp.Charset = charset.CharsetUTF8
+			stringFunc.Tp.Charset = charset.CharsetUTF8
 			sig = &builtinCastStringAsStringSig{stringFunc}
 		}
-		res, isNull, err := sig.evalString(t.row.ToRow())
+		res, isNull, err := sig.EvalString(t.row.ToRow())
 		c.Assert(isNull, Equals, false)
 		c.Assert(err, IsNil)
 		c.Assert(res, Equals, t.after)
@@ -807,7 +807,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(mysql.TypeDatetime)
 		tp.Decimal = int(types.DefaultFsp)
 		timeFunc := newBaseBuiltinFunc(ctx, args)
-		timeFunc.tp = tp
+		timeFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsTimeSig{timeFunc}
@@ -891,7 +891,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(t.tp)
 		tp.Decimal = int(t.fsp)
 		timeFunc := newBaseBuiltinFunc(ctx, args)
-		timeFunc.tp = tp
+		timeFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsTimeSig{timeFunc}
@@ -972,7 +972,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(mysql.TypeDuration)
 		tp.Decimal = int(types.DefaultFsp)
 		durationFunc := newBaseBuiltinFunc(ctx, args)
-		durationFunc.tp = tp
+		durationFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsDurationSig{durationFunc}
@@ -1049,7 +1049,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 		tp := types.NewFieldType(mysql.TypeDuration)
 		tp.Decimal = t.fsp
 		durationFunc := newBaseBuiltinFunc(ctx, args)
-		durationFunc.tp = tp
+		durationFunc.Tp = tp
 		switch i {
 		case 0:
 			sig = &builtinCastRealAsDurationSig{durationFunc}
@@ -1081,9 +1081,9 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 	args := []Expression{&Column{RetType: types.NewFieldType(mysql.TypeDouble), Index: 0}}
 	row := chunk.MutRowFromDatums([]types.Datum{types.NewDatum(nil)})
 	bf := newBaseBuiltinFunc(ctx, args)
-	bf.tp = types.NewFieldType(mysql.TypeVarString)
+	bf.Tp = types.NewFieldType(mysql.TypeVarString)
 	sig = &builtinCastRealAsStringSig{bf}
-	sRes, isNull, err := sig.evalString(row.ToRow())
+	sRes, isNull, err := sig.EvalString(row.ToRow())
 	c.Assert(sRes, Equals, "")
 	c.Assert(isNull, Equals, true)
 	c.Assert(err, IsNil)
@@ -1107,9 +1107,9 @@ func (s *testEvaluatorSuite) TestCastJSONAsDecimalSig(c *C) {
 
 	col := &Column{RetType: types.NewFieldType(mysql.TypeJSON), Index: 0}
 	decFunc := newBaseBuiltinCastFunc(newBaseBuiltinFunc(ctx, []Expression{col}), false)
-	decFunc.tp = types.NewFieldType(mysql.TypeNewDecimal)
-	decFunc.tp.Flen = 60
-	decFunc.tp.Decimal = 2
+	decFunc.Tp = types.NewFieldType(mysql.TypeNewDecimal)
+	decFunc.Tp.Flen = 60
+	decFunc.Tp.Decimal = 2
 	sig := &builtinCastJSONAsDecimalSig{decFunc}
 
 	var tests = []struct {

@@ -61,7 +61,7 @@ func (s *testEvaluatorSuite) TestUnary(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.UnaryMinus].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.UnaryMinus].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -125,7 +125,7 @@ func (s *testEvaluatorSuite) TestLogicAnd(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.LogicAnd, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.LogicAnd].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.LogicAnd].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -198,7 +198,7 @@ func (s *testEvaluatorSuite) TestRightShift(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.RightShift, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.RightShift].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.RightShift].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -238,7 +238,7 @@ func (s *testEvaluatorSuite) TestBitXor(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.Xor, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.Xor].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.Xor].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -285,7 +285,7 @@ func (s *testEvaluatorSuite) TestBitOr(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.Or, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.Or].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.Or].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -353,7 +353,7 @@ func (s *testEvaluatorSuite) TestLogicOr(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.LogicOr, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.LogicOr].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.LogicOr].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -393,7 +393,7 @@ func (s *testEvaluatorSuite) TestBitAnd(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.And, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.And].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.And].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -440,7 +440,7 @@ func (s *testEvaluatorSuite) TestBitNeg(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.BitNeg, Zero, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.BitNeg].getFunction(s.ctx, []Expression{Zero})
+	_, err = funcs[ast.BitNeg].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -493,7 +493,7 @@ func (s *testEvaluatorSuite) TestUnaryNot(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.UnaryNot, Zero, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.UnaryNot].getFunction(s.ctx, []Expression{Zero})
+	_, err = funcs[ast.UnaryNot].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -564,7 +564,7 @@ func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
 	}
 
 	for _, tc := range testCases {
-		isTrueSig, err := funcs[ast.IsTruth].getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
+		isTrueSig, err := funcs[ast.IsTruth].GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(isTrueSig, NotNil)
 
@@ -574,7 +574,7 @@ func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
 	}
 
 	for _, tc := range testCases {
-		isFalseSig, err := funcs[ast.IsFalsity].getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
+		isFalseSig, err := funcs[ast.IsFalsity].GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(isFalseSig, NotNil)
 
@@ -645,6 +645,6 @@ func (s *testEvaluatorSuite) TestLogicXor(c *C) {
 	_, err := newFunctionForTest(s.ctx, ast.LogicXor, Zero)
 	c.Assert(err, NotNil)
 
-	_, err = funcs[ast.LogicXor].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.LogicXor].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }

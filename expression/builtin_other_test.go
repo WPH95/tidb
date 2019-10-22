@@ -57,7 +57,7 @@ func (s *testEvaluatorSuite) TestBitCount(c *C) {
 	}
 	for _, test := range bitCountCases {
 		in := types.NewDatum(test.origin)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{in}))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{in}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		count, err := evalBuiltinFunc(f, chunk.Row{})
@@ -121,7 +121,7 @@ func (s *testEvaluatorSuite) TestInFunc(c *C) {
 		{[]interface{}{json1, json1, json3, json4}, int64(1)},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
+		fn, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutRowFromDatums(types.MakeDatums(tc.args...)).ToRow())
 		c.Assert(err, IsNil)
@@ -132,7 +132,7 @@ func (s *testEvaluatorSuite) TestInFunc(c *C) {
 func (s *testEvaluatorSuite) TestRowFunc(c *C) {
 	defer testleak.AfterTest(c)()
 	fc := funcs[ast.RowFunc]
-	_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums([]interface{}{"1", 1.2, true, 120}...)))
+	_, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums([]interface{}{"1", 1.2, true, 120}...)))
 	c.Assert(err, IsNil)
 }
 
@@ -150,7 +150,7 @@ func (s *testEvaluatorSuite) TestSetVar(c *C) {
 		{[]interface{}{"c", "dEf"}, "dEf"},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
+		fn, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutRowFromDatums(types.MakeDatums(tc.args...)).ToRow())
 		c.Assert(err, IsNil)
@@ -191,7 +191,7 @@ func (s *testEvaluatorSuite) TestGetVar(c *C) {
 		{[]interface{}{"d"}, ""},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
+		fn, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutRowFromDatums(types.MakeDatums(tc.args...)).ToRow())
 		c.Assert(err, IsNil)
@@ -208,11 +208,11 @@ func (s *testEvaluatorSuite) TestValues(c *C) {
 		s.ctx.GetSessionVars().StmtCtx.InInsertStmt = origin
 	}()
 
-	fc := &valuesFunctionClass{baseFunctionClass{ast.Values, 0, 0}, 1, types.NewFieldType(mysql.TypeVarchar)}
-	_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums("")))
+	fc := &valuesFunctionClass{BaseFunctionClass{ast.Values, 0, 0}, 1, types.NewFieldType(mysql.TypeVarchar)}
+	_, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums("")))
 	c.Assert(err, ErrorMatches, "*Incorrect parameter count in the call to native function 'values'")
 
-	sig, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums()))
+	sig, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums()))
 	c.Assert(err, IsNil)
 
 	ret, err := evalBuiltinFunc(sig, chunk.Row{})

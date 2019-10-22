@@ -47,7 +47,7 @@ func (s *testEvaluatorSuite) TestAbs(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.Abs]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -112,7 +112,7 @@ func (s *testEvaluatorSuite) TestCeil(c *C) {
 		}
 
 		for _, exp := range exps {
-			_, err := funcs[funcName].getFunction(s.ctx, []Expression{exp})
+			_, err := funcs[funcName].GetFunction(s.ctx, []Expression{exp})
 			c.Assert(err, IsNil)
 		}
 	}
@@ -165,7 +165,7 @@ func (s *testEvaluatorSuite) TestExp(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Exp].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Exp].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -238,7 +238,7 @@ func (s *testEvaluatorSuite) TestFloor(c *C) {
 			RetType: types.NewFieldType(mysql.TypeFloat),
 		},
 	} {
-		_, err := funcs[ast.Floor].getFunction(s.ctx, []Expression{exp})
+		_, err := funcs[ast.Floor].GetFunction(s.ctx, []Expression{exp})
 		c.Assert(err, IsNil)
 	}
 }
@@ -281,7 +281,7 @@ func (s *testEvaluatorSuite) TestLog(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Log].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Log].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -319,7 +319,7 @@ func (s *testEvaluatorSuite) TestLog2(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Log2].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Log2].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -357,14 +357,14 @@ func (s *testEvaluatorSuite) TestLog10(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Log10].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Log10].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
 func (s *testEvaluatorSuite) TestRand(c *C) {
 	defer testleak.AfterTest(c)()
 	fc := funcs[ast.Rand]
-	f, err := fc.getFunction(s.ctx, nil)
+	f, err := fc.GetFunction(s.ctx, nil)
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -372,7 +372,7 @@ func (s *testEvaluatorSuite) TestRand(c *C) {
 	c.Assert(v.GetFloat64(), GreaterEqual, float64(0))
 
 	// issue 3211
-	f2, err := fc.getFunction(s.ctx, []Expression{&Constant{Value: types.NewIntDatum(20160101), RetType: types.NewFieldType(mysql.TypeLonglong)}})
+	f2, err := fc.GetFunction(s.ctx, []Expression{&Constant{Value: types.NewIntDatum(20160101), RetType: types.NewFieldType(mysql.TypeLonglong)}})
 	c.Assert(err, IsNil)
 	randGen := rand.New(rand.NewSource(20160101))
 	for i := 0; i < 3; i++ {
@@ -398,7 +398,7 @@ func (s *testEvaluatorSuite) TestPow(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.Pow]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -416,7 +416,7 @@ func (s *testEvaluatorSuite) TestPow(c *C) {
 	errDtbl := tblToDtbl(errTbl)
 	for _, t := range errDtbl {
 		fc := funcs[ast.Pow]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, NotNil)
@@ -451,7 +451,7 @@ func (s *testEvaluatorSuite) TestRound(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.Round]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -494,7 +494,7 @@ func (s *testEvaluatorSuite) TestTruncate(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.Truncate]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
@@ -522,7 +522,7 @@ func (s *testEvaluatorSuite) TestCRC32(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.CRC32]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -590,7 +590,7 @@ func (s *testEvaluatorSuite) TestConv(c *C) {
 		c.Assert(r, Equals, t.ret)
 	}
 
-	_, err := funcs[ast.Conv].getFunction(s.ctx, []Expression{Zero, Zero, Zero})
+	_, err := funcs[ast.Conv].GetFunction(s.ctx, []Expression{Zero, Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -622,7 +622,7 @@ func (s *testEvaluatorSuite) TestSign(c *C) {
 		{[]interface{}{uint64(9223372036854775808)}, int64(1)},
 	} {
 		fc := funcs[ast.Sign]
-		f, err := fc.getFunction(s.ctx, s.primitiveValsToConstants(t.num))
+		f, err := fc.GetFunction(s.ctx, s.primitiveValsToConstants(t.num))
 		c.Assert(err, IsNil, Commentf("%v", t))
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil, Commentf("%v", t))
@@ -667,7 +667,7 @@ func (s *testEvaluatorSuite) TestDegrees(c *C) {
 			}
 		}
 	}
-	_, err := funcs[ast.Degrees].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Degrees].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -687,7 +687,7 @@ func (s *testEvaluatorSuite) TestSqrt(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[ast.Sqrt]
-		f, err := fc.getFunction(s.ctx, s.primitiveValsToConstants(t.Arg))
+		f, err := fc.GetFunction(s.ctx, s.primitiveValsToConstants(t.Arg))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -697,7 +697,7 @@ func (s *testEvaluatorSuite) TestSqrt(c *C) {
 
 func (s *testEvaluatorSuite) TestPi(c *C) {
 	defer testleak.AfterTest(c)()
-	f, err := funcs[ast.PI].getFunction(s.ctx, nil)
+	f, err := funcs[ast.PI].GetFunction(s.ctx, nil)
 	c.Assert(err, IsNil)
 
 	pi, err := evalBuiltinFunc(f, chunk.Row{})
@@ -721,7 +721,7 @@ func (s *testEvaluatorSuite) TestRadians(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	for _, t := range Dtbl {
 		fc := funcs[ast.Radians]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Arg"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
@@ -731,7 +731,7 @@ func (s *testEvaluatorSuite) TestRadians(c *C) {
 
 	invalidArg := "notNum"
 	fc := funcs[ast.Radians]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{types.NewDatum(invalidArg)}))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{types.NewDatum(invalidArg)}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, NotNil)
@@ -775,7 +775,7 @@ func (s *testEvaluatorSuite) TestSin(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Sin].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Sin].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -814,7 +814,7 @@ func (s *testEvaluatorSuite) TestCos(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Cos].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Cos].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -852,7 +852,7 @@ func (s *testEvaluatorSuite) TestAcos(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Acos].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Acos].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -890,7 +890,7 @@ func (s *testEvaluatorSuite) TestAsin(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Asin].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Asin].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -928,7 +928,7 @@ func (s *testEvaluatorSuite) TestAtan(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Atan].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Atan].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -966,7 +966,7 @@ func (s *testEvaluatorSuite) TestTan(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Tan].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Tan].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1010,6 +1010,6 @@ func (s *testEvaluatorSuite) TestCot(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Cot].getFunction(s.ctx, []Expression{One})
+	_, err := funcs[ast.Cot].GetFunction(s.ctx, []Expression{One})
 	c.Assert(err, IsNil)
 }

@@ -37,7 +37,7 @@ type ScalarFunction struct {
 	// RetType is the type that ScalarFunction returns.
 	// TODO: Implement type inference here, now we use ast's return type temporarily.
 	RetType  *types.FieldType
-	Function builtinFunc
+	Function BuiltinFunc
 	hashcode []byte
 }
 
@@ -134,7 +134,7 @@ func newFunctionImpl(ctx sessionctx.Context, fold bool, funcName string, retType
 	}
 	funcArgs := make([]Expression, len(args))
 	copy(funcArgs, args)
-	f, err := fc.getFunction(ctx, funcArgs)
+	f, err := fc.GetFunction(ctx, funcArgs)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func (sf *ScalarFunction) EvalDecimal(ctx sessionctx.Context, row chunk.Row) (*t
 
 // EvalString implements Expression interface.
 func (sf *ScalarFunction) EvalString(ctx sessionctx.Context, row chunk.Row) (string, bool, error) {
-	return sf.Function.evalString(row)
+	return sf.Function.EvalString(row)
 }
 
 // EvalTime implements Expression interface.

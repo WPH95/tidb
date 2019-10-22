@@ -1124,3 +1124,23 @@ func (s *testRangerSuite) TestCompIndexInExprCorrCol(c *C) {
 		testKit.MustQuery(tt).Check(testkit.Rows(output[i].Result...))
 	}
 }
+
+
+func (s *testRangerSuite) TestUserDefineMethod(c *C) {
+	defer testleak.AfterTest(c)()
+	expression.AddUserDefinedFunction("fuck", &TrimFunctionClass{expression.BaseFunctionClass{"fuck", 1, 3}})
+	dom, store, err := newDomainStoreWithBootstrap(c)
+	defer func() {
+		dom.Close()
+		store.Close()
+	}()
+	c.Assert(err, IsNil)
+	testKit := testkit.NewTestKit(c, store)
+	testKit.MustExec("use test")
+	testKit.MustExec("drop table if exists t")
+	testKit.MustExec("create table t(a int primary key, b int, c int, d int, e int, index idx(b,c,d))")
+	testKit.MustExec("insert into t values(1,1,1,1,2),(2,1,2,1,0)")
+	testKit.MustExec("analyze table t")
+	result := testKit.MustQuery(`select fuck(e) from t where a = 1;`)
+	result.Check(testkit.Rows(`2`))
+}

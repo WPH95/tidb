@@ -41,7 +41,7 @@ func (s *testEvaluatorSuite) TestJSONType(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -70,7 +70,7 @@ func (s *testEvaluatorSuite) TestJSONQuote(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -102,7 +102,7 @@ func (s *testEvaluatorSuite) TestJSONUnquote(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -125,7 +125,7 @@ func (s *testEvaluatorSuite) TestJSONExtract(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.Success {
@@ -151,7 +151,7 @@ func (s *testEvaluatorSuite) TestJSONExtract(c *C) {
 func (s *testEvaluatorSuite) TestJSONSetInsertReplace(c *C) {
 	defer testleak.AfterTest(c)()
 	tbl := []struct {
-		fc           functionClass
+		fc           FunctionClass
 		Input        []interface{}
 		Expected     interface{}
 		BuildSuccess bool
@@ -167,11 +167,11 @@ func (s *testEvaluatorSuite) TestJSONSetInsertReplace(c *C) {
 		{funcs[ast.JSONSet], []interface{}{`{}`, `$InvalidPath`, 3}, nil, true, false},
 	}
 	var err error
-	var f builtinFunc
+	var f BuiltinFunc
 	var d types.Datum
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err = t.fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = t.fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		if t.BuildSuccess {
 			c.Assert(err, IsNil)
 			d, err = evalBuiltinFunc(f, chunk.Row{})
@@ -207,7 +207,7 @@ func (s *testEvaluatorSuite) TestJSONMerge(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -238,7 +238,7 @@ func (s *testEvaluatorSuite) TestJSONMergePreserve(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -268,7 +268,7 @@ func (s *testEvaluatorSuite) TestJSONArray(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -298,11 +298,11 @@ func (s *testEvaluatorSuite) TestJSONObject(c *C) {
 		{[]interface{}{1, true}, `{"1": 1}`, true, true},
 	}
 	var err error
-	var f builtinFunc
+	var f BuiltinFunc
 	var d types.Datum
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		if t.BuildSuccess {
 			c.Assert(err, IsNil)
 			d, err = evalBuiltinFunc(f, chunk.Row{})
@@ -353,7 +353,7 @@ func (s *testEvaluatorSuite) TestJSONRemove(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 
@@ -425,7 +425,7 @@ func (s *testEvaluatorSuite) TestJSONContains(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.err == nil {
@@ -450,7 +450,7 @@ func (s *testEvaluatorSuite) TestJSONContains(c *C) {
 		{"", 0.05},
 	}
 	for _, cs := range cases {
-		_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(cs.arg1, cs.arg2)))
+		_, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(cs.arg1, cs.arg2)))
 		c.Assert(json.ErrInvalidJSONData.Equal(err), IsTrue)
 	}
 }
@@ -498,7 +498,7 @@ func (s *testEvaluatorSuite) TestJSONContainsPath(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.success {
@@ -569,7 +569,7 @@ func (s *testEvaluatorSuite) TestJSONLength(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.success {
@@ -633,7 +633,7 @@ func (s *testEvaluatorSuite) TestJSONKeys(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.success {
@@ -698,7 +698,7 @@ func (s *testEvaluatorSuite) TestJSONDepth(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.success {
@@ -762,7 +762,7 @@ func (s *testEvaluatorSuite) TestJSONArrayAppend(c *C) {
 	for i, t := range tbl {
 		args := types.MakeDatums(t.input...)
 		s.ctx.GetSessionVars().StmtCtx.SetWarnings(nil)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		// No error should return in getFunction if t.err is nil.
 		if err != nil {
 			c.Assert(t.err, NotNil)
@@ -845,7 +845,7 @@ func (s *testEvaluatorSuite) TestJSONSearch(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		if t.success {
@@ -911,7 +911,7 @@ func (s *testEvaluatorSuite) TestJSONArrayInsert(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeDatums(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(args))
 		// Parameter count error
 		if err != nil {
 			c.Assert(t.err, NotNil)
@@ -964,7 +964,7 @@ func (s *testEvaluatorSuite) TestJSONValid(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)

@@ -29,7 +29,7 @@ func (b *builtinMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) e
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalTime(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalTime(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -42,8 +42,8 @@ func (b *builtinMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) e
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
-				if err := handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
+			if b.Ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
+				if err := handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
 					return err
 				}
 				result.SetNull(i, true)
@@ -68,7 +68,7 @@ func (b *builtinYearSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) er
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalTime(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalTime(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -81,8 +81,8 @@ func (b *builtinYearSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) er
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
-				if err := handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
+			if b.Ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
+				if err := handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
 					return err
 				}
 				result.SetNull(i, true)
@@ -101,7 +101,7 @@ func (b *builtinYearSig) vectorized() bool {
 }
 
 func (b *builtinDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) error {
-	if err := b.args[0].VecEvalTime(b.ctx, input, result); err != nil {
+	if err := b.Args[0].VecEvalTime(b.Ctx, input, result); err != nil {
 		return err
 	}
 	times := result.Times()
@@ -110,7 +110,7 @@ func (b *builtinDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) e
 			continue
 		}
 		if times[i].IsZero() {
-			if err := handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(times[i].String())); err != nil {
+			if err := handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(times[i].String())); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
@@ -193,7 +193,7 @@ func (b *builtinWeekDaySig) vecEvalInt(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err = b.args[0].VecEvalTime(b.ctx, input, buf); err != nil {
+	if err = b.Args[0].VecEvalTime(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -206,7 +206,7 @@ func (b *builtinWeekDaySig) vecEvalInt(input *chunk.Chunk, result *chunk.Column)
 			continue
 		}
 		if ds[i].IsZero() {
-			if err = handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
+			if err = handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
@@ -228,7 +228,7 @@ func (b *builtinTimeFormatSig) vecEvalString(input *chunk.Chunk, result *chunk.C
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalDuration(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalDuration(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -237,7 +237,7 @@ func (b *builtinTimeFormatSig) vecEvalString(input *chunk.Chunk, result *chunk.C
 		return err1
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 
@@ -247,7 +247,7 @@ func (b *builtinTimeFormatSig) vecEvalString(input *chunk.Chunk, result *chunk.C
 			result.AppendNull()
 			continue
 		}
-		res, err := b.formatTime(b.ctx, buf.GetDuration(i, 0), buf1.GetString(i))
+		res, err := b.formatTime(b.Ctx, buf.GetDuration(i, 0), buf1.GetString(i))
 		if err != nil {
 			return err
 		}
@@ -595,7 +595,7 @@ func (b *builtinMinuteSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err = b.args[0].VecEvalDuration(b.ctx, input, buf); err != nil {
+	if err = b.Args[0].VecEvalDuration(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -712,7 +712,7 @@ func (b *builtinUTCDateSig) vectorized() bool {
 }
 
 func (b *builtinUTCDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) error {
-	nowTs, err := getStmtTimestamp(b.ctx)
+	nowTs, err := getStmtTimestamp(b.Ctx)
 	if err != nil {
 		return err
 	}
@@ -790,7 +790,7 @@ func (b *builtinHourSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) er
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err = b.args[0].VecEvalDuration(b.ctx, input, buf); err != nil {
+	if err = b.Args[0].VecEvalDuration(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -860,12 +860,12 @@ func (b *builtinCurrentDateSig) vectorized() bool {
 }
 
 func (b *builtinCurrentDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) error {
-	nowTs, err := getStmtTimestamp(b.ctx)
+	nowTs, err := getStmtTimestamp(b.Ctx)
 	if err != nil {
 		return err
 	}
 
-	tz := b.ctx.GetSessionVars().Location()
+	tz := b.Ctx.GetSessionVars().Location()
 	year, month, day := nowTs.In(tz).Date()
 	timeValue := types.Time{
 		Time: types.FromDate(year, int(month), day, 0, 0, 0, 0),
@@ -1007,13 +1007,13 @@ func (b *builtinCurrentTime0ArgSig) vectorized() bool {
 
 func (b *builtinCurrentTime0ArgSig) vecEvalDuration(input *chunk.Chunk, result *chunk.Column) error {
 	n := input.NumRows()
-	nowTs, err := getStmtTimestamp(b.ctx)
+	nowTs, err := getStmtTimestamp(b.Ctx)
 	if err != nil {
 		return err
 	}
-	tz := b.ctx.GetSessionVars().Location()
+	tz := b.Ctx.GetSessionVars().Location()
 	dur := nowTs.In(tz).Format(types.TimeFormat)
-	res, err := types.ParseDuration(b.ctx.GetSessionVars().StmtCtx, dur, types.MinFsp)
+	res, err := types.ParseDuration(b.Ctx.GetSessionVars().StmtCtx, dur, types.MinFsp)
 	if err != nil {
 		return err
 	}
@@ -1096,7 +1096,7 @@ func (b *builtinMonthNameSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalTime(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalTime(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1108,8 +1108,8 @@ func (b *builtinMonthNameSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 			continue
 		}
 		mon := ds[i].Time.Month()
-		if (ds[i].IsZero() && b.ctx.GetSessionVars().SQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
-			if err := handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
+		if (ds[i].IsZero() && b.Ctx.GetSessionVars().SQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
+			if err := handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
 				return err
 			}
 			result.AppendNull()
@@ -1170,17 +1170,17 @@ func (b *builtinCurrentTime1ArgSig) vecEvalDuration(input *chunk.Chunk, result *
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
-	nowTs, err := getStmtTimestamp(b.ctx)
+	nowTs, err := getStmtTimestamp(b.Ctx)
 	if err != nil {
 		return err
 	}
-	tz := b.ctx.GetSessionVars().Location()
+	tz := b.Ctx.GetSessionVars().Location()
 	dur := nowTs.In(tz).Format(types.TimeFSPFormat)
-	stmtCtx := b.ctx.GetSessionVars().StmtCtx
+	stmtCtx := b.Ctx.GetSessionVars().StmtCtx
 	i64s := buf.Int64s()
 	result.ResizeGoDuration(n, false)
 	durations := result.GoDurations()
@@ -1217,14 +1217,14 @@ func (b *builtinTimestamp1ArgSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf)
 	times := result.Times()
-	sc := b.ctx.GetSessionVars().StmtCtx
+	sc := b.Ctx.GetSessionVars().StmtCtx
 	var tm types.Time
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1238,7 +1238,7 @@ func (b *builtinTimestamp1ArgSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 			tm, err = types.ParseTime(sc, s, mysql.TypeDatetime, types.GetFsp(s))
 		}
 		if err != nil {
-			if err = handleInvalidTimeError(b.ctx, err); err != nil {
+			if err = handleInvalidTimeError(b.Ctx, err); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
@@ -1260,7 +1260,7 @@ func (b *builtinTimestamp2ArgsSig) vecEvalTime(input *chunk.Chunk, result *chunk
 		return err
 	}
 	defer b.bufAllocator.put(buf0)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf0); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf0); err != nil {
 		return err
 	}
 
@@ -1269,14 +1269,14 @@ func (b *builtinTimestamp2ArgsSig) vecEvalTime(input *chunk.Chunk, result *chunk
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf0, buf1)
 	times := result.Times()
-	sc := b.ctx.GetSessionVars().StmtCtx
+	sc := b.Ctx.GetSessionVars().StmtCtx
 	var tm types.Time
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1291,7 +1291,7 @@ func (b *builtinTimestamp2ArgsSig) vecEvalTime(input *chunk.Chunk, result *chunk
 			tm, err = types.ParseTime(sc, arg0, mysql.TypeDatetime, types.GetFsp(arg0))
 		}
 		if err != nil {
-			if err = handleInvalidTimeError(b.ctx, err); err != nil {
+			if err = handleInvalidTimeError(b.Ctx, err); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
@@ -1305,7 +1305,7 @@ func (b *builtinTimestamp2ArgsSig) vecEvalTime(input *chunk.Chunk, result *chunk
 
 		duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
-			if err = handleInvalidTimeError(b.ctx, err); err != nil {
+			if err = handleInvalidTimeError(b.Ctx, err); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
@@ -1331,7 +1331,7 @@ func (b *builtinDayOfMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Colu
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalTime(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalTime(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ResizeInt64(n, false)
@@ -1343,8 +1343,8 @@ func (b *builtinDayOfMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Colu
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
-				if err := handleInvalidTimeError(b.ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
+			if b.Ctx.GetSessionVars().SQLMode.HasNoZeroDateMode() {
+				if err := handleInvalidTimeError(b.Ctx, types.ErrIncorrectDatetimeValue.GenWithStackByArgs(ds[i].String())); err != nil {
 					return err
 				}
 				result.SetNull(i, true)

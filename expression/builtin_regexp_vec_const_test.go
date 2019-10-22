@@ -25,7 +25,7 @@ import (
 	"github.com/pingcap/tidb/util/testleak"
 )
 
-func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc builtinFunc, childrenFieldTypes []*types.FieldType, input *chunk.Chunk, output *chunk.Column) {
+func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc BuiltinFunc, childrenFieldTypes []*types.FieldType, input *chunk.Chunk, output *chunk.Column) {
 	const (
 		numArgs = 2
 		batchSz = 1024
@@ -48,7 +48,7 @@ func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc builtinFunc, childrenF
 	args[1] = DatumToConstant(types.NewStringDatum(rePat), mysql.TypeString)
 
 	var err error
-	baseFunc, err = funcs[ast.Regexp].getFunction(mock.NewContext(), args)
+	baseFunc, err = funcs[ast.Regexp].GetFunction(mock.NewContext(), args)
 	if err != nil {
 		panic(err)
 	}

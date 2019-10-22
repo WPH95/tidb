@@ -73,7 +73,7 @@ func (s *testEvaluatorSuite) TestLengthAndOctetLength(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Length].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Length].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -111,7 +111,7 @@ func (s *testEvaluatorSuite) TestASCII(c *C) {
 			}
 		}
 	}
-	_, err := funcs[ast.Length].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Length].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -184,7 +184,7 @@ func (s *testEvaluatorSuite) TestConcatSig(c *C) {
 		&Column{Index: 0, RetType: colTypes[0]},
 		&Column{Index: 1, RetType: colTypes[1]},
 	}
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	concat := &builtinConcatSig{base, 5}
 
 	cases := []struct {
@@ -203,7 +203,7 @@ func (s *testEvaluatorSuite) TestConcatSig(c *C) {
 		input.AppendString(0, t.args[0].(string))
 		input.AppendString(1, t.args[1].(string))
 
-		res, isNull, err := concat.evalString(input.GetRow(0))
+		res, isNull, err := concat.EvalString(input.GetRow(0))
 		c.Assert(res, Equals, t.res)
 		c.Assert(err, IsNil)
 		if t.warnings == 0 {
@@ -289,7 +289,7 @@ func (s *testEvaluatorSuite) TestConcatWS(c *C) {
 		}
 	}
 
-	_, err = funcs[ast.ConcatWS].getFunction(s.ctx, s.primitiveValsToConstants([]interface{}{nil, nil}))
+	_, err = funcs[ast.ConcatWS].GetFunction(s.ctx, s.primitiveValsToConstants([]interface{}{nil, nil}))
 	c.Assert(err, IsNil)
 }
 
@@ -305,7 +305,7 @@ func (s *testEvaluatorSuite) TestConcatWSSig(c *C) {
 		&Column{Index: 1, RetType: colTypes[1]},
 		&Column{Index: 2, RetType: colTypes[2]},
 	}
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	concat := &builtinConcatWSSig{base, 6}
 
 	cases := []struct {
@@ -325,7 +325,7 @@ func (s *testEvaluatorSuite) TestConcatWSSig(c *C) {
 		input.AppendString(1, t.args[1].(string))
 		input.AppendString(2, t.args[2].(string))
 
-		res, isNull, err := concat.evalString(input.GetRow(0))
+		res, isNull, err := concat.EvalString(input.GetRow(0))
 		c.Assert(res, Equals, t.res)
 		c.Assert(err, IsNil)
 		if t.warnings == 0 {
@@ -386,7 +386,7 @@ func (s *testEvaluatorSuite) TestLeft(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Left].getFunction(s.ctx, []Expression{varcharCon, int8Con})
+	_, err := funcs[ast.Left].GetFunction(s.ctx, []Expression{varcharCon, int8Con})
 	c.Assert(err, IsNil)
 }
 
@@ -436,7 +436,7 @@ func (s *testEvaluatorSuite) TestRight(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Right].getFunction(s.ctx, []Expression{varcharCon, int8Con})
+	_, err := funcs[ast.Right].GetFunction(s.ctx, []Expression{varcharCon, int8Con})
 	c.Assert(err, IsNil)
 }
 
@@ -444,49 +444,49 @@ func (s *testEvaluatorSuite) TestRepeat(c *C) {
 	defer testleak.AfterTest(c)()
 	args := []interface{}{"a", int64(2)}
 	fc := funcs[ast.Repeat]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "aa")
 
 	args = []interface{}{"a", uint64(2)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "aa")
 
 	args = []interface{}{"a", uint64(16777217)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.IsNull(), IsTrue)
 
 	args = []interface{}{"a", uint64(16777216)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.IsNull(), IsFalse)
 
 	args = []interface{}{"a", int64(-1)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "")
 
 	args = []interface{}{"a", int64(0)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "")
 
 	args = []interface{}{"a", uint64(0)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -503,7 +503,7 @@ func (s *testEvaluatorSuite) TestRepeatSig(c *C) {
 		&Column{Index: 0, RetType: colTypes[0]},
 		&Column{Index: 1, RetType: colTypes[1]},
 	}
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	repeat := &builtinRepeatSig{base, 1000}
 
 	cases := []struct {
@@ -522,7 +522,7 @@ func (s *testEvaluatorSuite) TestRepeatSig(c *C) {
 		input.AppendString(0, t.args[0].(string))
 		input.AppendInt64(1, t.args[1].(int64))
 
-		res, isNull, err := repeat.evalString(input.GetRow(0))
+		res, isNull, err := repeat.EvalString(input.GetRow(0))
 		c.Assert(res, Equals, t.res)
 		c.Assert(err, IsNil)
 		if t.warning == 0 {
@@ -567,7 +567,7 @@ func (s *testEvaluatorSuite) TestLower(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Lower].getFunction(s.ctx, []Expression{varcharCon})
+	_, err := funcs[ast.Lower].GetFunction(s.ctx, []Expression{varcharCon})
 	c.Assert(err, IsNil)
 }
 
@@ -600,14 +600,14 @@ func (s *testEvaluatorSuite) TestUpper(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Upper].getFunction(s.ctx, []Expression{varcharCon})
+	_, err := funcs[ast.Upper].GetFunction(s.ctx, []Expression{varcharCon})
 	c.Assert(err, IsNil)
 }
 
 func (s *testEvaluatorSuite) TestReverse(c *C) {
 	defer testleak.AfterTest(c)()
 	fc := funcs[ast.Reverse]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -626,7 +626,7 @@ func (s *testEvaluatorSuite) TestReverse(c *C) {
 	dtbl := tblToDtbl(tbl)
 
 	for _, t := range dtbl {
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.GetFunction(s.ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		d, err = evalBuiltinFunc(f, chunk.Row{})
@@ -714,7 +714,7 @@ func (s *testEvaluatorSuite) TestReplace(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Replace].getFunction(s.ctx, []Expression{Zero, Zero, Zero})
+	_, err := funcs[ast.Replace].GetFunction(s.ctx, []Expression{Zero, Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -760,10 +760,10 @@ func (s *testEvaluatorSuite) TestSubstring(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Substring].getFunction(s.ctx, []Expression{Zero, Zero, Zero})
+	_, err := funcs[ast.Substring].GetFunction(s.ctx, []Expression{Zero, Zero, Zero})
 	c.Assert(err, IsNil)
 
-	_, err = funcs[ast.Substring].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.Substring].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -784,7 +784,7 @@ func (s *testEvaluatorSuite) TestConvert(c *C) {
 	}
 	for _, v := range tbl {
 		fc := funcs[ast.Convert]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.cs)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.cs)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		retType := f.getRetTp()
@@ -811,18 +811,18 @@ func (s *testEvaluatorSuite) TestConvert(c *C) {
 	}
 	for _, v := range errTbl {
 		fc := funcs[ast.Convert]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.cs)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.cs)))
 		c.Assert(err.Error(), Equals, v.err)
 		c.Assert(f, IsNil)
 	}
 
 	// Test wrong charset while evaluating.
 	fc := funcs[ast.Convert]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums("haha", "utf8")))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums("haha", "utf8")))
 	c.Assert(err, IsNil)
 	c.Assert(f, NotNil)
 	wrongFunction := f.(*builtinConvertSig)
-	wrongFunction.tp.Charset = "wrongcharset"
+	wrongFunction.Tp.Charset = "wrongcharset"
 	_, err = evalBuiltinFunc(wrongFunction, chunk.Row{})
 	c.Assert(err.Error(), Equals, "[expression:1115]Unknown character set: 'wrongcharset'")
 }
@@ -871,7 +871,7 @@ func (s *testEvaluatorSuite) TestSubstringIndex(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.SubstringIndex].getFunction(s.ctx, []Expression{Zero, Zero, Zero})
+	_, err := funcs[ast.SubstringIndex].GetFunction(s.ctx, []Expression{Zero, Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -917,7 +917,7 @@ func (s *testEvaluatorSuite) TestSpace(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Space].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Space].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -929,16 +929,16 @@ func (s *testEvaluatorSuite) TestSpaceSig(c *C) {
 	args := []Expression{
 		&Column{Index: 0, RetType: colTypes[0]},
 	}
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	space := &builtinSpaceSig{base, 1000}
 	input := chunk.NewChunkWithCapacity(colTypes, 10)
 	input.AppendInt64(0, 6)
 	input.AppendInt64(0, 1001)
-	res, isNull, err := space.evalString(input.GetRow(0))
+	res, isNull, err := space.EvalString(input.GetRow(0))
 	c.Assert(res, Equals, "      ")
 	c.Assert(isNull, IsFalse)
 	c.Assert(err, IsNil)
-	res, isNull, err = space.evalString(input.GetRow(1))
+	res, isNull, err = space.EvalString(input.GetRow(1))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
@@ -988,7 +988,7 @@ func (s *testEvaluatorSuite) TestLocate(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	instr := funcs[ast.Locate]
 	for i, t := range Dtbl {
-		f, err := instr.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := instr.GetFunction(s.ctx, s.datumsToConstants(t["Args"]))
 		c.Assert(err, IsNil)
 		got, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1011,7 +1011,7 @@ func (s *testEvaluatorSuite) TestLocate(c *C) {
 		exprs := s.datumsToConstants(t["Args"])
 		types.SetBinChsClnFlag(exprs[0].GetType())
 		types.SetBinChsClnFlag(exprs[1].GetType())
-		f, err := instr.getFunction(s.ctx, exprs)
+		f, err := instr.GetFunction(s.ctx, exprs)
 		c.Assert(err, IsNil)
 		got, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1063,13 +1063,13 @@ func (s *testEvaluatorSuite) TestTrim(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Trim].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Trim].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 
-	_, err = funcs[ast.Trim].getFunction(s.ctx, []Expression{Zero, Zero})
+	_, err = funcs[ast.Trim].GetFunction(s.ctx, []Expression{Zero, Zero})
 	c.Assert(err, IsNil)
 
-	_, err = funcs[ast.Trim].getFunction(s.ctx, []Expression{Zero, Zero, Zero})
+	_, err = funcs[ast.Trim].GetFunction(s.ctx, []Expression{Zero, Zero, Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1111,7 +1111,7 @@ func (s *testEvaluatorSuite) TestLTrim(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.LTrim].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.LTrim].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1151,7 +1151,7 @@ func (s *testEvaluatorSuite) TestRTrim(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.RTrim].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.RTrim].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1192,10 +1192,10 @@ func (s *testEvaluatorSuite) TestHexFunc(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Hex].getFunction(s.ctx, []Expression{int8Con})
+	_, err := funcs[ast.Hex].GetFunction(s.ctx, []Expression{int8Con})
 	c.Assert(err, IsNil)
 
-	_, err = funcs[ast.Hex].getFunction(s.ctx, []Expression{varcharCon})
+	_, err = funcs[ast.Hex].GetFunction(s.ctx, []Expression{varcharCon})
 	c.Assert(err, IsNil)
 }
 
@@ -1235,7 +1235,7 @@ func (s *testEvaluatorSuite) TestUnhexFunc(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.Unhex].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Unhex].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1268,7 +1268,7 @@ func (s *testEvaluatorSuite) TestBitLength(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.BitLength].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.BitLength].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -1295,7 +1295,7 @@ func (s *testEvaluatorSuite) TestChar(c *C) {
 	for _, v := range tbl {
 		for _, char := range []interface{}{"utf8", nil} {
 			fc := funcs[ast.CharFunc]
-			f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.iNum, v.fNum, char)))
+			f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.str, v.iNum, v.fNum, char)))
 			c.Assert(err, IsNil)
 			c.Assert(f, NotNil)
 			r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1308,7 +1308,7 @@ func (s *testEvaluatorSuite) TestChar(c *C) {
 	}
 
 	fc := funcs[ast.CharFunc]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums("65", 66, nil)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums("65", 66, nil)))
 	c.Assert(err, IsNil)
 	r, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -1316,7 +1316,7 @@ func (s *testEvaluatorSuite) TestChar(c *C) {
 
 	// Test unsupported charset.
 	fc = funcs[ast.CharFunc]
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums("65", "tidb")))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums("65", "tidb")))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err.Error(), Equals, "unknown encoding: tidb")
@@ -1336,7 +1336,7 @@ func (s *testEvaluatorSuite) TestCharLength(c *C) {
 	}
 	for _, v := range tbl {
 		fc := funcs[ast.CharLength]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.input)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(v.input)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1363,7 +1363,7 @@ func (s *testEvaluatorSuite) TestCharLength(c *C) {
 		tp.Collate = charset.CollationBin
 		tp.Flen = types.UnspecifiedLength
 		tp.Flag = mysql.BinaryFlag
-		f, err := fc.getFunction(s.ctx, arg)
+		f, err := fc.GetFunction(s.ctx, arg)
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1392,7 +1392,7 @@ func (s *testEvaluatorSuite) TestFindInSet(c *C) {
 		{nil, "bar", nil},
 	} {
 		fc := funcs[ast.FindInSet]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.str, t.strlst)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.str, t.strlst)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1426,7 +1426,7 @@ func (s *testEvaluatorSuite) TestField(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.Field]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1456,7 +1456,7 @@ func (s *testEvaluatorSuite) TestLpad(c *C) {
 		str := types.NewStringDatum(test.str)
 		length := types.NewIntDatum(test.len)
 		padStr := types.NewStringDatum(test.padStr)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length, padStr}))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length, padStr}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1491,7 +1491,7 @@ func (s *testEvaluatorSuite) TestRpad(c *C) {
 		str := types.NewStringDatum(test.str)
 		length := types.NewIntDatum(test.len)
 		padStr := types.NewStringDatum(test.padStr)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length, padStr}))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length, padStr}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1519,7 +1519,7 @@ func (s *testEvaluatorSuite) TestRpadSig(c *C) {
 		&Column{Index: 2, RetType: colTypes[2]},
 	}
 
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	rpad := &builtinRpadSig{base, 1000}
 
 	input := chunk.NewChunkWithCapacity(colTypes, 10)
@@ -1530,12 +1530,12 @@ func (s *testEvaluatorSuite) TestRpadSig(c *C) {
 	input.AppendString(2, "123")
 	input.AppendString(2, "123")
 
-	res, isNull, err := rpad.evalString(input.GetRow(0))
+	res, isNull, err := rpad.EvalString(input.GetRow(0))
 	c.Assert(res, Equals, "abc123")
 	c.Assert(isNull, IsFalse)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = rpad.evalString(input.GetRow(1))
+	res, isNull, err = rpad.EvalString(input.GetRow(1))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
@@ -1562,7 +1562,7 @@ func (s *testEvaluatorSuite) TestInsertBinarySig(c *C) {
 		&Column{Index: 3, RetType: colTypes[3]},
 	}
 
-	base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+	base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 	insert := &builtinInsertBinarySig{base, 3}
 
 	input := chunk.NewChunkWithCapacity(colTypes, 2)
@@ -1595,37 +1595,37 @@ func (s *testEvaluatorSuite) TestInsertBinarySig(c *C) {
 	input.AppendString(3, "d")
 	input.AppendNull(3)
 
-	res, isNull, err := insert.evalString(input.GetRow(0))
+	res, isNull, err := insert.EvalString(input.GetRow(0))
 	c.Assert(res, Equals, "abd")
 	c.Assert(isNull, IsFalse)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(1))
+	res, isNull, err = insert.EvalString(input.GetRow(1))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(2))
+	res, isNull, err = insert.EvalString(input.GetRow(2))
 	c.Assert(res, Equals, "abc")
 	c.Assert(isNull, IsFalse)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(3))
+	res, isNull, err = insert.EvalString(input.GetRow(3))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(4))
+	res, isNull, err = insert.EvalString(input.GetRow(4))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(5))
+	res, isNull, err = insert.EvalString(input.GetRow(5))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	res, isNull, err = insert.evalString(input.GetRow(6))
+	res, isNull, err = insert.EvalString(input.GetRow(6))
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
@@ -1672,7 +1672,7 @@ func (s *testEvaluatorSuite) TestInstr(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	instr := funcs[ast.Instr]
 	for i, t := range Dtbl {
-		f, err := instr.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := instr.GetFunction(s.ctx, s.datumsToConstants(t["Args"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		got, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1699,7 +1699,7 @@ func (s *testEvaluatorSuite) TestMakeSet(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[ast.MakeSet]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argList...)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argList...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1741,7 +1741,7 @@ func (s *testEvaluatorSuite) TestOct(c *C) {
 	fc := funcs[ast.Oct]
 	for _, tt := range octTests {
 		in := types.NewDatum(tt.origin)
-		f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{in}))
+		f, _ := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{in}))
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -1751,7 +1751,7 @@ func (s *testEvaluatorSuite) TestOct(c *C) {
 	}
 	// tt NULL input for sha
 	var argNull types.Datum
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{argNull}))
+	f, _ := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(r.IsNull(), IsTrue)
@@ -1830,7 +1830,7 @@ func (s *testEvaluatorSuite) TestFormat(c *C) {
 
 	fc := funcs[ast.Format]
 	for _, tt := range formatTests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tt.number, tt.precision, tt.locale)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tt.number, tt.precision, tt.locale)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1841,7 +1841,7 @@ func (s *testEvaluatorSuite) TestFormat(c *C) {
 	origConfig := s.ctx.GetSessionVars().StmtCtx.TruncateAsWarning
 	s.ctx.GetSessionVars().StmtCtx.TruncateAsWarning = true
 	for _, tt := range formatTests1 {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tt.number, tt.precision)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(tt.number, tt.precision)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1858,21 +1858,21 @@ func (s *testEvaluatorSuite) TestFormat(c *C) {
 	}
 	s.ctx.GetSessionVars().StmtCtx.TruncateAsWarning = origConfig
 
-	f2, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests2.number, formatTests2.precision, formatTests2.locale)))
+	f2, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests2.number, formatTests2.precision, formatTests2.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f2, NotNil)
 	r2, err := evalBuiltinFunc(f2, chunk.Row{})
 	c.Assert(types.NewDatum(err), testutil.DatumEquals, types.NewDatum(errors.New("not implemented")))
 	c.Assert(r2, testutil.DatumEquals, types.NewDatum(formatTests2.ret))
 
-	f3, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests3.number, formatTests3.precision, formatTests3.locale)))
+	f3, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests3.number, formatTests3.precision, formatTests3.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f3, NotNil)
 	r3, err := evalBuiltinFunc(f3, chunk.Row{})
 	c.Assert(types.NewDatum(err), testutil.DatumEquals, types.NewDatum(errors.New("not support for the specific locale")))
 	c.Assert(r3, testutil.DatumEquals, types.NewDatum(formatTests3.ret))
 
-	f4, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests4.number, formatTests4.precision, formatTests4.locale)))
+	f4, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(formatTests4.number, formatTests4.precision, formatTests4.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f4, NotNil)
 	r4, err := evalBuiltinFunc(f4, chunk.Row{})
@@ -1914,7 +1914,7 @@ func (s *testEvaluatorSuite) TestFromBase64(c *C) {
 	}
 	fc := funcs[ast.FromBase64]
 	for _, test := range tests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(test.args)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(test.args)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
@@ -1961,12 +1961,12 @@ func (s *testEvaluatorSuite) TestFromBase64Sig(c *C) {
 
 	for _, test := range tests {
 		resultType := &types.FieldType{Tp: mysql.TypeVarchar, Flen: mysql.MaxBlobWidth}
-		base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+		base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 		fromBase64 := &builtinFromBase64Sig{base, test.maxAllowPacket}
 
 		input := chunk.NewChunkWithCapacity(colTypes, 1)
 		input.AppendString(0, test.args)
-		res, isNull, err := fromBase64.evalString(input.GetRow(0))
+		res, isNull, err := fromBase64.EvalString(input.GetRow(0))
 		c.Assert(err, IsNil)
 		c.Assert(isNull, Equals, test.isNil)
 		if isNull {
@@ -2011,7 +2011,7 @@ func (s *testEvaluatorSuite) TestInsert(c *C) {
 	}
 	fc := funcs[ast.InsertFunc]
 	for _, test := range tests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(test.args...)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(test.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
@@ -2063,7 +2063,7 @@ func (s *testEvaluatorSuite) TestOrd(c *C) {
 			}
 		}
 	}
-	_, err := funcs[ast.Ord].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.Ord].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -2083,7 +2083,7 @@ func (s *testEvaluatorSuite) TestElt(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.Elt]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -2111,7 +2111,7 @@ func (s *testEvaluatorSuite) TestExportSet(c *C) {
 	}
 	fc := funcs[ast.ExportSet]
 	for _, t := range estd {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.argLst...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		exportSetRes, err := evalBuiltinFunc(f, chunk.Row{})
@@ -2146,7 +2146,7 @@ func (s *testEvaluatorSuite) TestBin(c *C) {
 	ctx := mock.NewContext()
 	ctx.GetSessionVars().StmtCtx.IgnoreTruncate = true
 	for _, t := range dtbl {
-		f, err := fc.getFunction(ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.GetFunction(ctx, s.datumsToConstants(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -2176,7 +2176,7 @@ func (s *testEvaluatorSuite) TestQuote(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[ast.Quote]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.arg)))
+		f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(t.arg)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Row{})
@@ -2252,7 +2252,7 @@ func (s *testEvaluatorSuite) TestToBase64(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.ToBase64].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.ToBase64].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }
 
@@ -2301,12 +2301,12 @@ func (s *testEvaluatorSuite) TestToBase64Sig(c *C) {
 
 	for _, test := range tests {
 		resultType := &types.FieldType{Tp: mysql.TypeVarchar, Flen: base64NeededEncodedLength(len(test.args))}
-		base := baseBuiltinFunc{args: args, ctx: s.ctx, tp: resultType}
+		base := BaseBuiltinFunc{Args: args, Ctx: s.ctx, Tp: resultType}
 		toBase64 := &builtinToBase64Sig{base, test.maxAllowPacket}
 
 		input := chunk.NewChunkWithCapacity(colTypes, 1)
 		input.AppendString(0, test.args)
-		res, isNull, err := toBase64.evalString(input.GetRow(0))
+		res, isNull, err := toBase64.EvalString(input.GetRow(0))
 		c.Assert(err, IsNil)
 		if test.isNil {
 			c.Assert(isNull, IsTrue)
@@ -2343,7 +2343,7 @@ func (s *testEvaluatorSuite) TestStringRight(c *C) {
 	for _, test := range tests {
 		str := types.NewDatum(test.str)
 		length := types.NewDatum(test.length)
-		f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length}))
+		f, _ := fc.GetFunction(s.ctx, s.datumsToConstants([]types.Datum{str, length}))
 		result, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
 		if result.IsNull() {
