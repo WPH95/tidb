@@ -622,7 +622,7 @@ func (b *builtinSecondSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err = b.args[0].VecEvalDuration(b.ctx, input, buf); err != nil {
+	if err = b.Args[0].VecEvalDuration(b.Ctx, input, buf); err != nil {
 		return err
 	}
 

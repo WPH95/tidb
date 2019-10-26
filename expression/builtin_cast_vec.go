@@ -320,7 +320,7 @@ func (b *builtinCastIntAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -328,22 +328,22 @@ func (b *builtinCastIntAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 	result.MergeNulls(buf)
 	times := result.Times()
 	i64s := buf.Int64s()
-	stmt := b.ctx.GetSessionVars().StmtCtx
-	fsp := int8(b.tp.Decimal)
+	stmt := b.Ctx.GetSessionVars().StmtCtx
+	fsp := int8(b.Tp.Decimal)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
 			continue
 		}
-		tm, err := types.ParseTimeFromNum(stmt, i64s[i], b.tp.Tp, fsp)
+		tm, err := types.ParseTimeFromNum(stmt, i64s[i], b.Tp.Tp, fsp)
 		if err != nil {
-			if err = handleInvalidTimeError(b.ctx, err); err != nil {
+			if err = handleInvalidTimeError(b.Ctx, err); err != nil {
 				return err
 			}
 			result.SetNull(i, true)
 			continue
 		}
 		times[i] = tm
-		if b.tp.Tp == mysql.TypeDate {
+		if b.Tp.Tp == mysql.TypeDate {
 			// Truncate hh:mm:ss part if the type is Date.
 			times[i].Time = types.FromDate(tm.Time.Year(), tm.Time.Month(), tm.Time.Day(), 0, 0, 0, 0)
 		}

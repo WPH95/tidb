@@ -240,6 +240,10 @@ github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijb
 github.com/urfave/negroni v0.3.0/go.mod h1:Meg73S6kFm/4PpbYdq35yYWoCZ9mS/YSx+lKnmiohz4=
 github.com/vektah/goparsify v0.0.0-20180611020250-3e20a3b9244a h1:kjtLFYYtOh6EJz4svAJjY4apt9SJFQxe23e0mzTnlng=
 github.com/vektah/goparsify v0.0.0-20180611020250-3e20a3b9244a/go.mod h1:DSfslQMj3gv774kof/dg5pwh62XUjimkRBoF2DgdyaY=
+github.com/wph95/parser v0.0.0-20191026144119-08a4ef6b0dfd h1:fTMV1YxJuu82EkDOTqwfDBFFzZkG1UpXZ3qi+TTCYNs=
+github.com/wph95/parser v0.0.0-20191026144119-08a4ef6b0dfd/go.mod h1:QzHD0t19d+m/hPD328+lDpBkKwX/UqXGY+ZP6Kk9JCk=
+github.com/wph95/parser v0.0.0-20191026144906-452a5e63db22 h1:ueuGfjYancts9k28SpxzCx4i8FqxPcxcP0+FjLsJU6c=
+github.com/wph95/parser v0.0.0-20191026144906-452a5e63db22/go.mod h1:QzHD0t19d+m/hPD328+lDpBkKwX/UqXGY+ZP6Kk9JCk=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 h1:eY9dn8+vbi4tKz5Qo6v2eYzo7kUS51QINcR5jNpbZS8=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/yookoala/realpath v1.0.0/go.mod h1:gJJMA9wuX7AcqLy1+ffPatSCySA1FQ2S8Ya9AIoYBpE=

@@ -160,19 +160,19 @@ func (b *builtinJSONObjectSig) vectorized() bool {
 
 func (b *builtinJSONObjectSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Column) error {
 	nr := input.NumRows()
-	if len(b.args)&1 == 1 {
+	if len(b.Args)&1 == 1 {
 		err := ErrIncorrectParameterCount.GenWithStackByArgs(ast.JSONObject)
 		return err
 	}
 
 	jsons := make([]map[string]interface{}, nr)
 	for i := 0; i < nr; i++ {
-		jsons[i] = make(map[string]interface{}, len(b.args)>>1)
+		jsons[i] = make(map[string]interface{}, len(b.Args)>>1)
 	}
 
-	argBuffers := make([]*chunk.Column, len(b.args))
+	argBuffers := make([]*chunk.Column, len(b.Args))
 	var err error
-	for i := 0; i < len(b.args); i++ {
+	for i := 0; i < len(b.Args); i++ {
 		if i&1 == 0 {
 			if argBuffers[i], err = b.bufAllocator.get(types.ETString, nr); err != nil {
 				return err
@@ -181,7 +181,7 @@ func (b *builtinJSONObjectSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Col
 				b.bufAllocator.put(buf)
 			}(argBuffers[i])
 
-			if err = b.args[i].VecEvalString(b.ctx, input, argBuffers[i]); err != nil {
+			if err = b.Args[i].VecEvalString(b.Ctx, input, argBuffers[i]); err != nil {
 				return err
 			}
 		} else {
@@ -192,14 +192,14 @@ func (b *builtinJSONObjectSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Col
 				b.bufAllocator.put(buf)
 			}(argBuffers[i])
 
-			if err = b.args[i].VecEvalJSON(b.ctx, input, argBuffers[i]); err != nil {
+			if err = b.Args[i].VecEvalJSON(b.Ctx, input, argBuffers[i]); err != nil {
 				return err
 			}
 		}
 	}
 
 	result.ReserveJSON(nr)
-	for i := 0; i < len(b.args); i++ {
+	for i := 0; i < len(b.Args); i++ {
 		if i&1 == 1 {
 			keyCol := argBuffers[i-1]
 			valueCol := argBuffers[i]
@@ -329,7 +329,7 @@ func (b *builtinJSONUnquoteSig) vecEvalString(input *chunk.Chunk, result *chunk.
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalJSON(b.Ctx, input, buf); err != nil {
 		return err
 	}
 

@@ -12,6 +12,7 @@ require (
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548
 	github.com/cznic/sortutil v0.0.0-20150617083342-4c7342852e65
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dgryski/go-farm v0.0.0-20190104051053-3adb47b1fb0f
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
@@ -83,3 +84,5 @@ require (
 )
 
 go 1.13
+
+replace github.com/pingcap/parser => github.com/wph95/parser v0.0.0-20191026144906-452a5e63db22
