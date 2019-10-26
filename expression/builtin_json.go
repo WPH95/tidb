@@ -29,84 +29,84 @@ import (
 )
 
 var (
-	_ functionClass = &jsonTypeFunctionClass{}
-	_ functionClass = &jsonExtractFunctionClass{}
-	_ functionClass = &jsonUnquoteFunctionClass{}
-	_ functionClass = &jsonQuoteFunctionClass{}
-	_ functionClass = &jsonSetFunctionClass{}
-	_ functionClass = &jsonInsertFunctionClass{}
-	_ functionClass = &jsonReplaceFunctionClass{}
-	_ functionClass = &jsonRemoveFunctionClass{}
-	_ functionClass = &jsonMergeFunctionClass{}
-	_ functionClass = &jsonObjectFunctionClass{}
-	_ functionClass = &jsonArrayFunctionClass{}
-	_ functionClass = &jsonContainsFunctionClass{}
-	_ functionClass = &jsonContainsPathFunctionClass{}
-	_ functionClass = &jsonValidFunctionClass{}
-	_ functionClass = &jsonArrayAppendFunctionClass{}
-	_ functionClass = &jsonArrayInsertFunctionClass{}
-	_ functionClass = &jsonMergePatchFunctionClass{}
-	_ functionClass = &jsonMergePreserveFunctionClass{}
-	_ functionClass = &jsonPrettyFunctionClass{}
-	_ functionClass = &jsonQuoteFunctionClass{}
-	_ functionClass = &jsonSearchFunctionClass{}
-	_ functionClass = &jsonStorageSizeFunctionClass{}
-	_ functionClass = &jsonDepthFunctionClass{}
-	_ functionClass = &jsonKeysFunctionClass{}
-	_ functionClass = &jsonLengthFunctionClass{}
+	_ FunctionClass = &jsonTypeFunctionClass{}
+	_ FunctionClass = &jsonExtractFunctionClass{}
+	_ FunctionClass = &jsonUnquoteFunctionClass{}
+	_ FunctionClass = &jsonQuoteFunctionClass{}
+	_ FunctionClass = &jsonSetFunctionClass{}
+	_ FunctionClass = &jsonInsertFunctionClass{}
+	_ FunctionClass = &jsonReplaceFunctionClass{}
+	_ FunctionClass = &jsonRemoveFunctionClass{}
+	_ FunctionClass = &jsonMergeFunctionClass{}
+	_ FunctionClass = &jsonObjectFunctionClass{}
+	_ FunctionClass = &jsonArrayFunctionClass{}
+	_ FunctionClass = &jsonContainsFunctionClass{}
+	_ FunctionClass = &jsonContainsPathFunctionClass{}
+	_ FunctionClass = &jsonValidFunctionClass{}
+	_ FunctionClass = &jsonArrayAppendFunctionClass{}
+	_ FunctionClass = &jsonArrayInsertFunctionClass{}
+	_ FunctionClass = &jsonMergePatchFunctionClass{}
+	_ FunctionClass = &jsonMergePreserveFunctionClass{}
+	_ FunctionClass = &jsonPrettyFunctionClass{}
+	_ FunctionClass = &jsonQuoteFunctionClass{}
+	_ FunctionClass = &jsonSearchFunctionClass{}
+	_ FunctionClass = &jsonStorageSizeFunctionClass{}
+	_ FunctionClass = &jsonDepthFunctionClass{}
+	_ FunctionClass = &jsonKeysFunctionClass{}
+	_ FunctionClass = &jsonLengthFunctionClass{}
 
-	_ builtinFunc = &builtinJSONTypeSig{}
-	_ builtinFunc = &builtinJSONQuoteSig{}
-	_ builtinFunc = &builtinJSONUnquoteSig{}
-	_ builtinFunc = &builtinJSONArraySig{}
-	_ builtinFunc = &builtinJSONArrayAppendSig{}
-	_ builtinFunc = &builtinJSONArrayInsertSig{}
-	_ builtinFunc = &builtinJSONObjectSig{}
-	_ builtinFunc = &builtinJSONExtractSig{}
-	_ builtinFunc = &builtinJSONSetSig{}
-	_ builtinFunc = &builtinJSONInsertSig{}
-	_ builtinFunc = &builtinJSONReplaceSig{}
-	_ builtinFunc = &builtinJSONRemoveSig{}
-	_ builtinFunc = &builtinJSONMergeSig{}
-	_ builtinFunc = &builtinJSONContainsSig{}
-	_ builtinFunc = &builtinJSONDepthSig{}
-	_ builtinFunc = &builtinJSONSearchSig{}
-	_ builtinFunc = &builtinJSONKeysSig{}
-	_ builtinFunc = &builtinJSONKeys2ArgsSig{}
-	_ builtinFunc = &builtinJSONLengthSig{}
-	_ builtinFunc = &builtinJSONValidJSONSig{}
-	_ builtinFunc = &builtinJSONValidStringSig{}
-	_ builtinFunc = &builtinJSONValidOthersSig{}
+	_ BuiltinFunc = &builtinJSONTypeSig{}
+	_ BuiltinFunc = &builtinJSONQuoteSig{}
+	_ BuiltinFunc = &builtinJSONUnquoteSig{}
+	_ BuiltinFunc = &builtinJSONArraySig{}
+	_ BuiltinFunc = &builtinJSONArrayAppendSig{}
+	_ BuiltinFunc = &builtinJSONArrayInsertSig{}
+	_ BuiltinFunc = &builtinJSONObjectSig{}
+	_ BuiltinFunc = &builtinJSONExtractSig{}
+	_ BuiltinFunc = &builtinJSONSetSig{}
+	_ BuiltinFunc = &builtinJSONInsertSig{}
+	_ BuiltinFunc = &builtinJSONReplaceSig{}
+	_ BuiltinFunc = &builtinJSONRemoveSig{}
+	_ BuiltinFunc = &builtinJSONMergeSig{}
+	_ BuiltinFunc = &builtinJSONContainsSig{}
+	_ BuiltinFunc = &builtinJSONDepthSig{}
+	_ BuiltinFunc = &builtinJSONSearchSig{}
+	_ BuiltinFunc = &builtinJSONKeysSig{}
+	_ BuiltinFunc = &builtinJSONKeys2ArgsSig{}
+	_ BuiltinFunc = &builtinJSONLengthSig{}
+	_ BuiltinFunc = &builtinJSONValidJSONSig{}
+	_ BuiltinFunc = &builtinJSONValidStringSig{}
+	_ BuiltinFunc = &builtinJSONValidOthersSig{}
 )
 
 type jsonTypeFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONTypeSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONTypeSig) Clone() builtinFunc {
+func (b *builtinJSONTypeSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONTypeSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonTypeFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonTypeFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
-	bf.tp.Flen = 51 // Flen of JSON_TYPE is length of UNSIGNED INTEGER.
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
+	bf.Tp.Flen = 51 // Flen of JSON_TYPE is length of UNSIGNED INTEGER.
 	sig := &builtinJSONTypeSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonTypeSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonTypeSig)
 	return sig, nil
 }
 
-func (b *builtinJSONTypeSig) evalString(row chunk.Row) (res string, isNull bool, err error) {
+func (b *builtinJSONTypeSig) EvalString(row chunk.Row) (res string, isNull bool, err error) {
 	var j json.BinaryJSON
-	j, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	j, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return "", isNull, err
 	}
@@ -114,21 +114,21 @@ func (b *builtinJSONTypeSig) evalString(row chunk.Row) (res string, isNull bool,
 }
 
 type jsonExtractFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONExtractSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONExtractSig) Clone() builtinFunc {
+func (b *builtinJSONExtractSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONExtractSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonExtractFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonExtractFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, len(args))
@@ -136,21 +136,21 @@ func (c *jsonExtractFunctionClass) getFunction(ctx sessionctx.Context, args []Ex
 	for range args[1:] {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	sig := &builtinJSONExtractSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonExtractSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonExtractSig)
 	return sig, nil
 }
 
 func (b *builtinJSONExtractSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return
 	}
-	pathExprs := make([]json.PathExpression, 0, len(b.args)-1)
-	for _, arg := range b.args[1:] {
+	pathExprs := make([]json.PathExpression, 0, len(b.Args)-1)
+	for _, arg := range b.Args[1:] {
 		var s string
-		s, isNull, err = arg.EvalString(b.ctx, row)
+		s, isNull, err = arg.EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}
@@ -168,33 +168,33 @@ func (b *builtinJSONExtractSig) evalJSON(row chunk.Row) (res json.BinaryJSON, is
 }
 
 type jsonUnquoteFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONUnquoteSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONUnquoteSig) Clone() builtinFunc {
+func (b *builtinJSONUnquoteSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONUnquoteSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonUnquoteFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonUnquoteFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
 	DisableParseJSONFlag4Expr(args[0])
 	sig := &builtinJSONUnquoteSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonUnquoteSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonUnquoteSig)
 	return sig, nil
 }
 
-func (b *builtinJSONUnquoteSig) evalString(row chunk.Row) (res string, isNull bool, err error) {
+func (b *builtinJSONUnquoteSig) EvalString(row chunk.Row) (res string, isNull bool, err error) {
 	var j json.BinaryJSON
-	j, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	j, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return "", isNull, err
 	}
@@ -203,141 +203,141 @@ func (b *builtinJSONUnquoteSig) evalString(row chunk.Row) (res string, isNull bo
 }
 
 type jsonSetFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONSetSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONSetSig) Clone() builtinFunc {
+func (b *builtinJSONSetSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONSetSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonSetFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonSetFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	if len(args)&1 != 1 {
-		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	argTps = append(argTps, types.ETJson)
 	for i := 1; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 2; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONSetSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonSetSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonSetSig)
 	return sig, nil
 }
 
 func (b *builtinJSONSetSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = jsonModify(b.ctx, b.args, row, json.ModifySet)
+	res, isNull, err = jsonModify(b.Ctx, b.Args, row, json.ModifySet)
 	return res, isNull, err
 }
 
 type jsonInsertFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONInsertSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONInsertSig) Clone() builtinFunc {
+func (b *builtinJSONInsertSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONInsertSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonInsertFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonInsertFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	if len(args)&1 != 1 {
-		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	argTps = append(argTps, types.ETJson)
 	for i := 1; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 2; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONInsertSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonInsertSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonInsertSig)
 	return sig, nil
 }
 
 func (b *builtinJSONInsertSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = jsonModify(b.ctx, b.args, row, json.ModifyInsert)
+	res, isNull, err = jsonModify(b.Ctx, b.Args, row, json.ModifyInsert)
 	return res, isNull, err
 }
 
 type jsonReplaceFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONReplaceSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONReplaceSig) Clone() builtinFunc {
+func (b *builtinJSONReplaceSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONReplaceSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonReplaceFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonReplaceFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	if len(args)&1 != 1 {
-		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	argTps = append(argTps, types.ETJson)
 	for i := 1; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 2; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONReplaceSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonReplaceSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonReplaceSig)
 	return sig, nil
 }
 
 func (b *builtinJSONReplaceSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = jsonModify(b.ctx, b.args, row, json.ModifyReplace)
+	res, isNull, err = jsonModify(b.Ctx, b.Args, row, json.ModifyReplace)
 	return res, isNull, err
 }
 
 type jsonRemoveFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONRemoveSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONRemoveSig) Clone() builtinFunc {
+func (b *builtinJSONRemoveSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONRemoveSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonRemoveFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonRemoveFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, len(args))
@@ -345,21 +345,21 @@ func (c *jsonRemoveFunctionClass) getFunction(ctx sessionctx.Context, args []Exp
 	for range args[1:] {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	sig := &builtinJSONRemoveSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonRemoveSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonRemoveSig)
 	return sig, nil
 }
 
 func (b *builtinJSONRemoveSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	pathExprs := make([]json.PathExpression, 0, len(b.args)-1)
-	for _, arg := range b.args[1:] {
+	pathExprs := make([]json.PathExpression, 0, len(b.Args)-1)
+	for _, arg := range b.Args[1:] {
 		var s string
-		s, isNull, err = arg.EvalString(b.ctx, row)
+		s, isNull, err = arg.EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}
@@ -378,38 +378,38 @@ func (b *builtinJSONRemoveSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 }
 
 type jsonMergeFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONMergeSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONMergeSig) Clone() builtinFunc {
+func (b *builtinJSONMergeSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONMergeSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonMergeFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonMergeFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	for range args {
 		argTps = append(argTps, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	sig := &builtinJSONMergeSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonMergeSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonMergeSig)
 	return sig, nil
 }
 
 func (b *builtinJSONMergeSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	values := make([]json.BinaryJSON, 0, len(b.args))
-	for _, arg := range b.args {
+	values := make([]json.BinaryJSON, 0, len(b.Args))
+	for _, arg := range b.Args {
 		var value json.BinaryJSON
-		value, isNull, err = arg.EvalJSON(b.ctx, row)
+		value, isNull, err = arg.EvalJSON(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}
@@ -419,56 +419,56 @@ func (b *builtinJSONMergeSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNu
 	// function "JSON_MERGE" is deprecated since MySQL 5.7.22. Synonym for function "JSON_MERGE_PRESERVE".
 	// See https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-merge
 	if b.pbCode == tipb.ScalarFuncSig_JsonMergeSig {
-		b.ctx.GetSessionVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoReplacement.GenWithStackByArgs("JSON_MERGE"))
+		b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoReplacement.GenWithStackByArgs("JSON_MERGE"))
 	}
 	return res, false, nil
 }
 
 type jsonObjectFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONObjectSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONObjectSig) Clone() builtinFunc {
+func (b *builtinJSONObjectSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONObjectSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonObjectFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonObjectFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	if len(args)&1 != 0 {
-		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	for i := 0; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 1; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONObjectSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonObjectSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonObjectSig)
 	return sig, nil
 }
 
 func (b *builtinJSONObjectSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	if len(b.args)&1 == 1 {
+	if len(b.Args)&1 == 1 {
 		err = ErrIncorrectParameterCount.GenWithStackByArgs(ast.JSONObject)
 		return res, true, err
 	}
-	jsons := make(map[string]interface{}, len(b.args)>>1)
+	jsons := make(map[string]interface{}, len(b.Args)>>1)
 	var key string
 	var value json.BinaryJSON
-	for i, arg := range b.args {
+	for i, arg := range b.Args {
 		if i&1 == 0 {
-			key, isNull, err = arg.EvalString(b.ctx, row)
+			key, isNull, err = arg.EvalString(b.Ctx, row)
 			if err != nil {
 				return res, true, err
 			}
@@ -477,7 +477,7 @@ func (b *builtinJSONObjectSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 				return res, true, err
 			}
 		} else {
-			value, isNull, err = arg.EvalJSON(b.ctx, row)
+			value, isNull, err = arg.EvalJSON(b.Ctx, row)
 			if err != nil {
 				return res, true, err
 			}
@@ -491,40 +491,40 @@ func (b *builtinJSONObjectSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 }
 
 type jsonArrayFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONArraySig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONArraySig) Clone() builtinFunc {
+func (b *builtinJSONArraySig) Clone() BuiltinFunc {
 	newSig := &builtinJSONArraySig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonArrayFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonArrayFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	for range args {
 		argTps = append(argTps, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := range args {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONArraySig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonArraySig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonArraySig)
 	return sig, nil
 }
 
 func (b *builtinJSONArraySig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	jsons := make([]interface{}, 0, len(b.args))
-	for _, arg := range b.args {
-		j, isNull, err := arg.EvalJSON(b.ctx, row)
+	jsons := make([]interface{}, 0, len(b.Args))
+	for _, arg := range b.Args {
+		j, isNull, err := arg.EvalJSON(b.Ctx, row)
 		if err != nil {
 			return res, true, err
 		}
@@ -537,39 +537,39 @@ func (b *builtinJSONArraySig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNu
 }
 
 type jsonContainsPathFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONContainsPathSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONContainsPathSig) Clone() builtinFunc {
+func (b *builtinJSONContainsPathSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONContainsPathSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonContainsPathFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonContainsPathFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := []types.EvalType{types.ETJson, types.ETString}
 	for i := 3; i <= len(args); i++ {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
 	sig := &builtinJSONContainsPathSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonContainsPathSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonContainsPathSig)
 	return sig, nil
 }
 
 func (b *builtinJSONContainsPathSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	obj, isNull, err := b.args[0].EvalJSON(b.ctx, row)
+	obj, isNull, err := b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	containType, isNull, err := b.args[1].EvalString(b.ctx, row)
+	containType, isNull, err := b.Args[1].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -579,8 +579,8 @@ func (b *builtinJSONContainsPathSig) evalInt(row chunk.Row) (res int64, isNull b
 	}
 	var pathExpr json.PathExpression
 	contains := int64(1)
-	for i := 2; i < len(b.args); i++ {
-		path, isNull, err := b.args[i].EvalString(b.ctx, row)
+	for i := 2; i < len(b.Args); i++ {
+		path, isNull, err := b.Args[i].EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}
@@ -640,21 +640,21 @@ func jsonModify(ctx sessionctx.Context, args []Expression, row chunk.Row, mt jso
 }
 
 type jsonContainsFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONContainsSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONContainsSig) Clone() builtinFunc {
+func (b *builtinJSONContainsSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONContainsSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 func (c *jsonContainsFunctionClass) verifyArgs(args []Expression) error {
-	if err := c.baseFunctionClass.verifyArgs(args); err != nil {
+	if err := c.BaseFunctionClass.VerifyArgs(args); err != nil {
 		return err
 	}
 	if evalType := args[0].GetType().EvalType(); evalType != types.ETJson && evalType != types.ETString {
@@ -666,7 +666,7 @@ func (c *jsonContainsFunctionClass) verifyArgs(args []Expression) error {
 	return nil
 }
 
-func (c *jsonContainsFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+func (c *jsonContainsFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
@@ -675,24 +675,24 @@ func (c *jsonContainsFunctionClass) getFunction(ctx sessionctx.Context, args []E
 	if len(args) == 3 {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
 	sig := &builtinJSONContainsSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonContainsSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonContainsSig)
 	return sig, nil
 }
 
 func (b *builtinJSONContainsSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	obj, isNull, err := b.args[0].EvalJSON(b.ctx, row)
+	obj, isNull, err := b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	target, isNull, err := b.args[1].EvalJSON(b.ctx, row)
+	target, isNull, err := b.Args[1].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
 	var pathExpr json.PathExpression
-	if len(b.args) == 3 {
-		path, isNull, err := b.args[2].EvalString(b.ctx, row)
+	if len(b.Args) == 3 {
+		path, isNull, err := b.Args[2].EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}
@@ -717,64 +717,64 @@ func (b *builtinJSONContainsSig) evalInt(row chunk.Row) (res int64, isNull bool,
 }
 
 type jsonValidFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonValidFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonValidFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 
-	var sig builtinFunc
+	var sig BuiltinFunc
 	argType := args[0].GetType().EvalType()
 	switch argType {
 	case types.ETJson:
-		bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETJson)
+		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETJson)
 		sig = &builtinJSONValidJSONSig{bf}
-		sig.setPbCode(tipb.ScalarFuncSig_JsonValidJsonSig)
+		sig.SetPbCode(tipb.ScalarFuncSig_JsonValidJsonSig)
 	case types.ETString:
-		bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETString)
+		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETString)
 		sig = &builtinJSONValidStringSig{bf}
-		sig.setPbCode(tipb.ScalarFuncSig_JsonValidStringSig)
+		sig.SetPbCode(tipb.ScalarFuncSig_JsonValidStringSig)
 	default:
-		bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argType)
+		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argType)
 		sig = &builtinJSONValidOthersSig{bf}
-		sig.setPbCode(tipb.ScalarFuncSig_JsonValidOthersSig)
+		sig.SetPbCode(tipb.ScalarFuncSig_JsonValidOthersSig)
 	}
 	return sig, nil
 }
 
 type builtinJSONValidJSONSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONValidJSONSig) Clone() builtinFunc {
+func (b *builtinJSONValidJSONSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONValidJSONSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 // evalInt evals a builtinJSONValidJSONSig.
 // See https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-valid
 func (b *builtinJSONValidJSONSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	_, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	_, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	return 1, isNull, err
 }
 
 type builtinJSONValidStringSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONValidStringSig) Clone() builtinFunc {
+func (b *builtinJSONValidStringSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONValidStringSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 // evalInt evals a builtinJSONValidStringSig.
 // See https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-valid
 func (b *builtinJSONValidStringSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	val, isNull, err := b.args[0].EvalString(b.ctx, row)
+	val, isNull, err := b.Args[0].EvalString(b.Ctx, row)
 	if err != nil || isNull {
 		return 0, isNull, err
 	}
@@ -789,12 +789,12 @@ func (b *builtinJSONValidStringSig) evalInt(row chunk.Row) (res int64, isNull bo
 }
 
 type builtinJSONValidOthersSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONValidOthersSig) Clone() builtinFunc {
+func (b *builtinJSONValidOthersSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONValidOthersSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
@@ -805,21 +805,21 @@ func (b *builtinJSONValidOthersSig) evalInt(row chunk.Row) (res int64, isNull bo
 }
 
 type jsonArrayAppendFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONArrayAppendSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
 func (c *jsonArrayAppendFunctionClass) verifyArgs(args []Expression) error {
 	if len(args) < 3 || (len(args)&1 != 1) {
-		return ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 	return nil
 }
 
-func (c *jsonArrayAppendFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+func (c *jsonArrayAppendFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
@@ -828,30 +828,30 @@ func (c *jsonArrayAppendFunctionClass) getFunction(ctx sessionctx.Context, args 
 	for i := 1; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 2; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONArrayAppendSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonArrayAppendSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonArrayAppendSig)
 	return sig, nil
 }
 
-func (b *builtinJSONArrayAppendSig) Clone() builtinFunc {
+func (b *builtinJSONArrayAppendSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONArrayAppendSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 func (b *builtinJSONArrayAppendSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if err != nil || isNull {
 		return res, true, err
 	}
 
-	for i := 1; i < len(b.args)-1; i += 2 {
+	for i := 1; i < len(b.Args)-1; i += 2 {
 		// If JSON path is NULL, MySQL breaks and returns NULL.
-		s, isNull, err := b.args[i].EvalString(b.ctx, row)
+		s, isNull, err := b.Args[i].EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, true, err
 		}
@@ -878,7 +878,7 @@ func (b *builtinJSONArrayAppendSig) evalJSON(row chunk.Row) (res json.BinaryJSON
 			obj = json.CreateBinary([]interface{}{obj})
 		}
 
-		value, isnull, err := b.args[i+1].EvalJSON(b.ctx, row)
+		value, isnull, err := b.Args[i+1].EvalJSON(b.Ctx, row)
 		if err != nil {
 			return res, true, err
 		}
@@ -899,19 +899,19 @@ func (b *builtinJSONArrayAppendSig) evalJSON(row chunk.Row) (res json.BinaryJSON
 }
 
 type jsonArrayInsertFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONArrayInsertSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (c *jsonArrayInsertFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonArrayInsertFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	if len(args)&1 != 1 {
-		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.funcName)
+		return nil, ErrIncorrectParameterCount.GenWithStackByArgs(c.FuncName)
 	}
 
 	argTps := make([]types.EvalType, 0, len(args))
@@ -919,30 +919,30 @@ func (c *jsonArrayInsertFunctionClass) getFunction(ctx sessionctx.Context, args 
 	for i := 1; i < len(args)-1; i += 2 {
 		argTps = append(argTps, types.ETString, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	for i := 2; i < len(args); i += 2 {
 		DisableParseJSONFlag4Expr(args[i])
 	}
 	sig := &builtinJSONArrayInsertSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonArrayInsertSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonArrayInsertSig)
 	return sig, nil
 }
 
-func (b *builtinJSONArrayInsertSig) Clone() builtinFunc {
+func (b *builtinJSONArrayInsertSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONArrayInsertSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 func (b *builtinJSONArrayInsertSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if err != nil || isNull {
 		return res, true, err
 	}
 
-	for i := 1; i < len(b.args)-1; i += 2 {
+	for i := 1; i < len(b.Args)-1; i += 2 {
 		// If JSON path is NULL, MySQL breaks and returns NULL.
-		s, isNull, err := b.args[i].EvalString(b.ctx, row)
+		s, isNull, err := b.Args[i].EvalString(b.Ctx, row)
 		if err != nil || isNull {
 			return res, true, err
 		}
@@ -955,7 +955,7 @@ func (b *builtinJSONArrayInsertSig) evalJSON(row chunk.Row) (res json.BinaryJSON
 			return res, true, json.ErrInvalidJSONPathWildcard.GenWithStackByArgs(s)
 		}
 
-		value, isnull, err := b.args[i+1].EvalJSON(b.ctx, row)
+		value, isnull, err := b.Args[i+1].EvalJSON(b.Ctx, row)
 		if err != nil {
 			return res, true, err
 		}
@@ -973,67 +973,67 @@ func (b *builtinJSONArrayInsertSig) evalJSON(row chunk.Row) (res json.BinaryJSON
 }
 
 type jsonMergePatchFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonMergePatchFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+func (c *jsonMergePatchFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
 	return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", "JSON_MERGE_PATCH")
 }
 
 type jsonMergePreserveFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonMergePreserveFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonMergePreserveFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	for range args {
 		argTps = append(argTps, types.ETJson)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	sig := &builtinJSONMergeSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonMergePreserveSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonMergePreserveSig)
 	return sig, nil
 }
 
 type jsonPrettyFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonPrettyFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+func (c *jsonPrettyFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
 	return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", "JSON_PRETTY")
 }
 
 type jsonQuoteFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONQuoteSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONQuoteSig) Clone() builtinFunc {
+func (b *builtinJSONQuoteSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONQuoteSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonQuoteFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonQuoteFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETJson)
 	DisableParseJSONFlag4Expr(args[0])
 	sig := &builtinJSONQuoteSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonQuoteSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonQuoteSig)
 	return sig, nil
 }
 
-func (b *builtinJSONQuoteSig) evalString(row chunk.Row) (res string, isNull bool, err error) {
+func (b *builtinJSONQuoteSig) EvalString(row chunk.Row) (res string, isNull bool, err error) {
 	var j json.BinaryJSON
-	j, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	j, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return "", isNull, err
 	}
@@ -1041,21 +1041,21 @@ func (b *builtinJSONQuoteSig) evalString(row chunk.Row) (res string, isNull bool
 }
 
 type jsonSearchFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONSearchSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONSearchSig) Clone() builtinFunc {
+func (b *builtinJSONSearchSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONSearchSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonSearchFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonSearchFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	// json_doc, one_or_all, search_str[, escape_char[, path] ...])
@@ -1064,23 +1064,23 @@ func (c *jsonSearchFunctionClass) getFunction(ctx sessionctx.Context, args []Exp
 	for range args[1:] {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
 	sig := &builtinJSONSearchSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonSearchSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonSearchSig)
 	return sig, nil
 }
 
 func (b *builtinJSONSearchSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
 	// json_doc
 	var obj json.BinaryJSON
-	obj, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	obj, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
 
 	// one_or_all
 	var containType string
-	containType, isNull, err = b.args[1].EvalString(b.ctx, row)
+	containType, isNull, err = b.Args[1].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1090,14 +1090,14 @@ func (b *builtinJSONSearchSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 
 	// search_str & escape_char
 	var searchStr string
-	searchStr, isNull, err = b.args[2].EvalString(b.ctx, row)
+	searchStr, isNull, err = b.Args[2].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
 	escape := byte('\\')
-	if len(b.args) >= 4 {
+	if len(b.Args) >= 4 {
 		var escapeStr string
-		escapeStr, isNull, err = b.args[3].EvalString(b.ctx, row)
+		escapeStr, isNull, err = b.Args[3].EvalString(b.Ctx, row)
 		if err != nil {
 			return res, isNull, err
 		}
@@ -1124,11 +1124,11 @@ func (b *builtinJSONSearchSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 		}
 		return false, nil
 	}
-	if len(b.args) >= 5 { // path...
-		pathExprs := make([]json.PathExpression, 0, len(b.args)-4)
-		for i := 4; i < len(b.args); i++ {
+	if len(b.Args) >= 5 { // path...
+		pathExprs := make([]json.PathExpression, 0, len(b.Args)-4)
+		for i := 4; i < len(b.Args); i++ {
 			var s string
-			s, isNull, err = b.args[i].EvalString(b.ctx, row)
+			s, isNull, err = b.Args[i].EvalString(b.Ctx, row)
 			if isNull || err != nil {
 				return res, isNull, err
 			}
@@ -1162,40 +1162,40 @@ func (b *builtinJSONSearchSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isN
 }
 
 type jsonStorageSizeFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonStorageSizeFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+func (c *jsonStorageSizeFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
 	return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", "JSON_STORAGE_SIZE")
 }
 
 type jsonDepthFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONDepthSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONDepthSig) Clone() builtinFunc {
+func (b *builtinJSONDepthSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONDepthSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonDepthFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonDepthFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETJson)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETJson)
 	sig := &builtinJSONDepthSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonDepthSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonDepthSig)
 	return sig, nil
 }
 
 func (b *builtinJSONDepthSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	obj, isNull, err := b.args[0].EvalJSON(b.ctx, row)
+	obj, isNull, err := b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1204,42 +1204,42 @@ func (b *builtinJSONDepthSig) evalInt(row chunk.Row) (res int64, isNull bool, er
 }
 
 type jsonKeysFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *jsonKeysFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonKeysFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTps := []types.EvalType{types.ETJson}
 	if len(args) == 2 {
 		argTps = append(argTps, types.ETString)
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
-	var sig builtinFunc
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETJson, argTps...)
+	var sig BuiltinFunc
 	switch len(args) {
 	case 1:
 		sig = &builtinJSONKeysSig{bf}
-		sig.setPbCode(tipb.ScalarFuncSig_JsonKeysSig)
+		sig.SetPbCode(tipb.ScalarFuncSig_JsonKeysSig)
 	case 2:
 		sig = &builtinJSONKeys2ArgsSig{bf}
-		sig.setPbCode(tipb.ScalarFuncSig_JsonKeys2ArgsSig)
+		sig.SetPbCode(tipb.ScalarFuncSig_JsonKeys2ArgsSig)
 	}
 	return sig, nil
 }
 
 type builtinJSONKeysSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONKeysSig) Clone() builtinFunc {
+func (b *builtinJSONKeysSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONKeysSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 func (b *builtinJSONKeysSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1250,17 +1250,17 @@ func (b *builtinJSONKeysSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNul
 }
 
 type builtinJSONKeys2ArgsSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONKeys2ArgsSig) Clone() builtinFunc {
+func (b *builtinJSONKeys2ArgsSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONKeys2ArgsSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
 func (b *builtinJSONKeys2ArgsSig) evalJSON(row chunk.Row) (res json.BinaryJSON, isNull bool, err error) {
-	res, isNull, err = b.args[0].EvalJSON(b.ctx, row)
+	res, isNull, err = b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1268,7 +1268,7 @@ func (b *builtinJSONKeys2ArgsSig) evalJSON(row chunk.Row) (res json.BinaryJSON, 
 		return res, true, json.ErrInvalidJSONData
 	}
 
-	path, isNull, err := b.args[1].EvalString(b.ctx, row)
+	path, isNull, err := b.Args[1].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1293,21 +1293,21 @@ func (b *builtinJSONKeys2ArgsSig) evalJSON(row chunk.Row) (res json.BinaryJSON, 
 }
 
 type jsonLengthFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
 type builtinJSONLengthSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinJSONLengthSig) Clone() builtinFunc {
+func (b *builtinJSONLengthSig) Clone() BuiltinFunc {
 	newSig := &builtinJSONLengthSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
-func (c *jsonLengthFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *jsonLengthFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 
@@ -1317,14 +1317,14 @@ func (c *jsonLengthFunctionClass) getFunction(ctx sessionctx.Context, args []Exp
 		argTps = append(argTps, types.ETString)
 	}
 
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTps...)
 	sig := &builtinJSONLengthSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_JsonLengthSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_JsonLengthSig)
 	return sig, nil
 }
 
 func (b *builtinJSONLengthSig) evalInt(row chunk.Row) (res int64, isNull bool, err error) {
-	obj, isNull, err := b.args[0].EvalJSON(b.ctx, row)
+	obj, isNull, err := b.Args[0].EvalJSON(b.Ctx, row)
 	if isNull || err != nil {
 		return res, isNull, err
 	}
@@ -1333,8 +1333,8 @@ func (b *builtinJSONLengthSig) evalInt(row chunk.Row) (res int64, isNull bool, e
 		return 1, false, nil
 	}
 
-	if len(b.args) == 2 {
-		path, isNull, err := b.args[1].EvalString(b.ctx, row)
+	if len(b.Args) == 2 {
+		path, isNull, err := b.Args[1].EvalString(b.Ctx, row)
 		if isNull || err != nil {
 			return res, isNull, err
 		}

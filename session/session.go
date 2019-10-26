@@ -1077,7 +1077,9 @@ func (s *session) execute(ctx context.Context, sql string) (recordSets []sqlexec
 		s.rollbackOnError(ctx)
 		logutil.Logger(ctx).Warn("parse SQL failed",
 			zap.Error(err),
-			zap.String("SQL", sql))
+			zap.String("SQL", sql),
+			zap.String("charsetInfo", charsetInfo),
+			zap.String("collation", collation))
 		return nil, util.SyntaxError(err)
 	}
 	durParse := time.Since(startTS)
@@ -1100,6 +1102,7 @@ func (s *session) execute(ctx context.Context, sql string) (recordSets []sqlexec
 		if err := executor.ResetContextOfStmt(s, stmtNode); err != nil {
 			return nil, err
 		}
+
 		stmt, err := compiler.Compile(ctx, stmtNode)
 		if err != nil {
 			s.rollbackOnError(ctx)

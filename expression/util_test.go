@@ -46,12 +46,12 @@ func (s *testUtilSuite) checkPanic(f func()) (ret bool) {
 
 func (s *testUtilSuite) TestBaseBuiltin(c *check.C) {
 	ctx := mock.NewContext()
-	bf := newBaseBuiltinFuncWithTp(ctx, nil, types.ETTimestamp)
+	bf := NewBaseBuiltinFuncWithTp(ctx, nil, types.ETTimestamp)
 	_, _, err := bf.evalInt(chunk.Row{})
 	c.Assert(err, check.NotNil)
 	_, _, err = bf.evalReal(chunk.Row{})
 	c.Assert(err, check.NotNil)
-	_, _, err = bf.evalString(chunk.Row{})
+	_, _, err = bf.EvalString(chunk.Row{})
 	c.Assert(err, check.NotNil)
 	_, _, err = bf.evalDecimal(chunk.Row{})
 	c.Assert(err, check.NotNil)
@@ -64,7 +64,7 @@ func (s *testUtilSuite) TestBaseBuiltin(c *check.C) {
 }
 
 func (s *testUtilSuite) TestClone(c *check.C) {
-	builtinFuncs := []builtinFunc{
+	builtinFuncs := []BuiltinFunc{
 		&builtinArithmeticPlusRealSig{}, &builtinArithmeticPlusDecimalSig{}, &builtinArithmeticPlusIntSig{}, &builtinArithmeticMinusRealSig{}, &builtinArithmeticMinusDecimalSig{},
 		&builtinArithmeticMinusIntSig{}, &builtinArithmeticDivideRealSig{}, &builtinArithmeticDivideDecimalSig{}, &builtinArithmeticMultiplyRealSig{}, &builtinArithmeticMultiplyDecimalSig{},
 		&builtinArithmeticMultiplyIntUnsignedSig{}, &builtinArithmeticMultiplyIntSig{}, &builtinArithmeticIntDivideIntSig{}, &builtinArithmeticIntDivideDecimalSig{}, &builtinArithmeticModIntSig{},
@@ -208,7 +208,7 @@ func (s *testUtilSuite) TestSetExprColumnInOperand(c *check.C) {
 	col := &Column{RetType: newIntFieldType()}
 	c.Assert(setExprColumnInOperand(col).(*Column).InOperand, check.IsTrue)
 
-	f, err := funcs[ast.Abs].getFunction(mock.NewContext(), []Expression{col})
+	f, err := funcs[ast.Abs].GetFunction(mock.NewContext(), []Expression{col})
 	c.Assert(err, check.IsNil)
 	fun := &ScalarFunction{Function: f}
 	setExprColumnInOperand(fun)
@@ -217,7 +217,7 @@ func (s *testUtilSuite) TestSetExprColumnInOperand(c *check.C) {
 
 func (s testUtilSuite) TestPopRowFirstArg(c *check.C) {
 	c1, c2, c3 := &Column{RetType: newIntFieldType()}, &Column{RetType: newIntFieldType()}, &Column{RetType: newIntFieldType()}
-	f, err := funcs[ast.RowFunc].getFunction(mock.NewContext(), []Expression{c1, c2, c3})
+	f, err := funcs[ast.RowFunc].GetFunction(mock.NewContext(), []Expression{c1, c2, c3})
 	c.Assert(err, check.IsNil)
 	fun := &ScalarFunction{Function: f, FuncName: model.NewCIStr(ast.RowFunc), RetType: newIntFieldType()}
 	fun2, err := PopRowFirstArg(mock.NewContext(), fun)

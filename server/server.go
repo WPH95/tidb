@@ -33,6 +33,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/pingcap/tidb/expression"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -240,6 +241,14 @@ func NewServer(cfg *config.Config, driver IDriver) (*Server, error) {
 		s.listener = pplistener
 	}
 
+	err = plugin.ForeachPlugin(plugin.UDF, func(p *plugin.Plugin) error {
+		udfPlugin := plugin.DeclareUDFManifest(p.Manifest)
+		meta := udfPlugin.GetUserDefinedFuncClass()
+		expression.AddUserDefinedFunction(meta.FuncName, meta.Func, meta.MinArgs, meta.MaxArgs)
+		logutil.BgLogger().Info("insert udf", zap.String("function name", meta.FuncName))
+		return nil
+	})
+
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -348,6 +357,7 @@ func (s *Server) Run() error {
 			}
 			return nil
 		})
+
 		if err != nil {
 			continue
 		}

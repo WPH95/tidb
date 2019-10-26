@@ -24,39 +24,39 @@ import (
 )
 
 var (
-	_ functionClass = &likeFunctionClass{}
-	_ functionClass = &regexpFunctionClass{}
+	_ FunctionClass = &likeFunctionClass{}
+	_ FunctionClass = &regexpFunctionClass{}
 )
 
 var (
-	_ builtinFunc = &builtinLikeSig{}
-	_ builtinFunc = &builtinRegexpBinarySig{}
-	_ builtinFunc = &builtinRegexpSig{}
+	_ BuiltinFunc = &builtinLikeSig{}
+	_ BuiltinFunc = &builtinRegexpBinarySig{}
+	_ BuiltinFunc = &builtinRegexpSig{}
 )
 
 type likeFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *likeFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *likeFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
 	argTp := []types.EvalType{types.ETString, types.ETString, types.ETInt}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTp...)
-	bf.tp.Flen = 1
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, argTp...)
+	bf.Tp.Flen = 1
 	sig := &builtinLikeSig{bf}
-	sig.setPbCode(tipb.ScalarFuncSig_LikeSig)
+	sig.SetPbCode(tipb.ScalarFuncSig_LikeSig)
 	return sig, nil
 }
 
 type builtinLikeSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 }
 
-func (b *builtinLikeSig) Clone() builtinFunc {
+func (b *builtinLikeSig) Clone() BuiltinFunc {
 	newSig := &builtinLikeSig{}
-	newSig.cloneFrom(&b.baseBuiltinFunc)
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
 	return newSig
 }
 
@@ -64,17 +64,17 @@ func (b *builtinLikeSig) Clone() builtinFunc {
 // See https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like
 // NOTE: Currently tikv's like function is case sensitive, so we keep its behavior here.
 func (b *builtinLikeSig) evalInt(row chunk.Row) (int64, bool, error) {
-	valStr, isNull, err := b.args[0].EvalString(b.ctx, row)
+	valStr, isNull, err := b.Args[0].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return 0, isNull, err
 	}
 
 	// TODO: We don't need to compile pattern if it has been compiled or it is static.
-	patternStr, isNull, err := b.args[1].EvalString(b.ctx, row)
+	patternStr, isNull, err := b.Args[1].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return 0, isNull, err
 	}
-	val, isNull, err := b.args[2].EvalInt(b.ctx, row)
+	val, isNull, err := b.Args[2].EvalInt(b.Ctx, row)
 	if isNull || err != nil {
 		return 0, isNull, err
 	}
@@ -85,16 +85,16 @@ func (b *builtinLikeSig) evalInt(row chunk.Row) (int64, bool, error) {
 }
 
 type regexpFunctionClass struct {
-	baseFunctionClass
+	BaseFunctionClass
 }
 
-func (c *regexpFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
-	if err := c.verifyArgs(args); err != nil {
+func (c *regexpFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf := newBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETString, types.ETString)
-	bf.tp.Flen = 1
-	var sig builtinFunc
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETInt, types.ETString, types.ETString)
+	bf.Tp.Flen = 1
+	var sig BuiltinFunc
 	if types.IsBinaryStr(args[0].GetType()) || types.IsBinaryStr(args[1].GetType()) {
 		sig = newBuiltinRegexpBinarySig(bf)
 	} else {
@@ -104,14 +104,14 @@ func (c *regexpFunctionClass) getFunction(ctx sessionctx.Context, args []Express
 }
 
 type builtinRegexpSharedSig struct {
-	baseBuiltinFunc
+	BaseBuiltinFunc
 	compile        func(string) (*regexp.Regexp, error)
 	memoizedRegexp *regexp.Regexp
 	memoizedErr    error
 }
 
 func (b *builtinRegexpSharedSig) clone(from *builtinRegexpSharedSig) {
-	b.cloneFrom(&from.baseBuiltinFunc)
+	b.CloneFrom(&from.BaseBuiltinFunc)
 	b.compile = from.compile
 	if from.memoizedRegexp != nil {
 		b.memoizedRegexp = from.memoizedRegexp.Copy()
@@ -122,12 +122,12 @@ func (b *builtinRegexpSharedSig) clone(from *builtinRegexpSharedSig) {
 // evalInt evals `expr REGEXP pat`, or `expr RLIKE pat`.
 // See https://dev.mysql.com/doc/refman/5.7/en/regexp.html#operator_regexp
 func (b *builtinRegexpSharedSig) evalInt(row chunk.Row) (int64, bool, error) {
-	expr, isNull, err := b.args[0].EvalString(b.ctx, row)
+	expr, isNull, err := b.Args[0].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return 0, true, err
 	}
 
-	pat, isNull, err := b.args[1].EvalString(b.ctx, row)
+	pat, isNull, err := b.Args[1].EvalString(b.Ctx, row)
 	if isNull || err != nil {
 		return 0, true, err
 	}
@@ -144,13 +144,13 @@ type builtinRegexpBinarySig struct {
 	builtinRegexpSharedSig
 }
 
-func newBuiltinRegexpBinarySig(bf baseBuiltinFunc) *builtinRegexpBinarySig {
-	shared := builtinRegexpSharedSig{baseBuiltinFunc: bf}
+func newBuiltinRegexpBinarySig(bf BaseBuiltinFunc) *builtinRegexpBinarySig {
+	shared := builtinRegexpSharedSig{BaseBuiltinFunc: bf}
 	shared.compile = regexp.Compile
 	return &builtinRegexpBinarySig{builtinRegexpSharedSig: shared}
 }
 
-func (b *builtinRegexpBinarySig) Clone() builtinFunc {
+func (b *builtinRegexpBinarySig) Clone() BuiltinFunc {
 	newSig := &builtinRegexpBinarySig{}
 	newSig.clone(&b.builtinRegexpSharedSig)
 	return newSig
@@ -160,15 +160,15 @@ type builtinRegexpSig struct {
 	builtinRegexpSharedSig
 }
 
-func newBuiltinRegexpSig(bf baseBuiltinFunc) *builtinRegexpSig {
-	shared := builtinRegexpSharedSig{baseBuiltinFunc: bf}
+func newBuiltinRegexpSig(bf BaseBuiltinFunc) *builtinRegexpSig {
+	shared := builtinRegexpSharedSig{BaseBuiltinFunc: bf}
 	shared.compile = func(pat string) (*regexp.Regexp, error) {
 		return regexp.Compile("(?i)" + pat)
 	}
 	return &builtinRegexpSig{builtinRegexpSharedSig: shared}
 }
 
-func (b *builtinRegexpSig) Clone() builtinFunc {
+func (b *builtinRegexpSig) Clone() BuiltinFunc {
 	newSig := &builtinRegexpSig{}
 	newSig.clone(&b.builtinRegexpSharedSig)
 	return newSig

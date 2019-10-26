@@ -1,0 +1,14 @@
+name = "udftrim"
+kind = "UDF"
+description = "UDF Expression Release"
+version = "1"
+license = ""
+sysVars = [
+
+]
+validate = "Validate"
+onInit = "OnInit"
+onShutdown = "OnShutdown"
+export = [
+    {extPoint="GetUserDefinedFuncClass", impl="GetUserDefinedFuncClass"},
+]
