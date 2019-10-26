@@ -1,54 +1,95 @@
-// Copyright 2019 PingCAP, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package main_test
+package main
 
 import (
-	"context"
-
+	"flag"
+	. "github.com/pingcap/check"
+	"github.com/pingcap/parser"
+	"github.com/pingcap/tidb/domain"
+	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/plugin"
-	"github.com/pingcap/tidb/sessionctx/variable"
+	"github.com/pingcap/tidb/session"
+	"github.com/pingcap/tidb/store/mockstore"
+	"github.com/pingcap/tidb/store/mockstore/mocktikv"
+	"github.com/pingcap/tidb/util/mock"
+	"github.com/pingcap/tidb/util/testkit"
+	"testing"
 )
 
-func LoadRunShutdownPluginExample() {
-	ctx := context.Background()
-	var pluginVarNames []string
-	cfg := plugin.Config{
-		Plugins:        []string{"csv-1"},
-		PluginDir:      "/home/go/src/github.com/pingcap/tidb/plugin/csv",
-		GlobalSysVar:   &variable.SysVars,
-		PluginVarNames: &pluginVarNames,
+type baseTestSuite struct {
+	cluster   *mocktikv.Cluster
+	mvccStore mocktikv.MVCCStore
+	store     kv.Storage
+	domain    *domain.Domain
+	*parser.Parser
+	ctx *mock.Context
+}
+
+var mockTikv = flag.Bool("mockTikv", true, "use mock tikv store in executor test")
+
+func (s *baseTestSuite) SetUpSuite(c *C) {
+	s.Parser = parser.New()
+	flag.Lookup("mockTikv")
+	useMockTikv := *mockTikv
+	if useMockTikv {
+		s.cluster = mocktikv.NewCluster()
+		mocktikv.BootstrapWithSingleStore(s.cluster)
+		s.mvccStore = mocktikv.MustNewMVCCStore()
+		store, err := mockstore.NewMockTikvStore(
+			mockstore.WithCluster(s.cluster),
+			mockstore.WithMVCCStore(s.mvccStore),
+		)
+		c.Assert(err, IsNil)
+		s.store = store
+		session.SetSchemaLease(0)
+		session.DisableStats4Test()
 	}
+	d, err := session.BootstrapSession(s.store)
+	c.Assert(err, IsNil)
+	d.SetStatsUpdating(true)
+	s.domain = d
+}
 
-	err := plugin.Load(ctx, cfg)
-	if err != nil {
-		panic(err)
+func (s *baseTestSuite) TearDownSuite(c *C) {
+	s.domain.Close()
+	s.store.Close()
+}
+
+var _ = Suite(&testPlugin{&baseTestSuite{}})
+
+type testPlugin struct{ *baseTestSuite }
+
+func TestPlugin(t *testing.T) {
+	//rescueStdout := os.Stdout
+	//_, w, _ := os.Pipe()
+	//os.Stdout = w
+	//
+	//os.Stdout = rescueStdout
+	//
+	//runConf := RunConf{Output: rescueStdout, Verbose: true, KeepWorkDir: true}
+	TestingT(t)
+}
+
+func (s *testPlugin) TestPlugin(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	manifest := &plugin.EngineManifest{
+		Manifest: plugin.Manifest{
+			Name: "csv",
+		},
+		OnReaderOpen: OnReaderOpen,
+		OnReaderNext: OnReaderNext,
+		//OnReaderClose: plugin.OnReaderClose,
 	}
-
-	// load and start TiDB domain.
-
-	err = plugin.Init(ctx, cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	err = plugin.ForeachPlugin(plugin.Audit, func(auditPlugin *plugin.Plugin) error {
-		plugin.DeclareAuditManifest(auditPlugin.Manifest).OnGeneralEvent(context.Background(), nil, plugin.Log, "QUERY")
-		return nil
+	plugin.Set(plugin.Engine, &plugin.Plugin{
+		Manifest: plugin.ExportManifest(manifest),
+		Path:     "",
+		Disabled: 0,
+		State:    plugin.Ready,
 	})
-	if err != nil {
-		panic(err)
-	}
 
-	plugin.Shutdown(context.Background())
+	tk.MustExec("use test")
+	tk.MustExec("create table t1(a int, b char(255)) ENGINE = csv")
+	result := tk.MustQuery("select * from t1")
+	result.Check(testkit.Rows("0 233333", "1 233333", "2 233333", "3 233333", "4 233333", "5 233333"))
+	result = tk.MustQuery("select * from t1 where a = 2")
+	result.Check(testkit.Rows("2 233333", ))
 }
