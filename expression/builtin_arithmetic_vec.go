@@ -587,7 +587,7 @@ func (b *builtinArithmeticMultiplyIntUnsignedSig) vectorized() bool {
 }
 
 func (b *builtinArithmeticMultiplyIntUnsignedSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) error {
-	if err := b.args[0].VecEvalInt(b.ctx, input, result); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, result); err != nil {
 		return err
 	}
 	n := input.NumRows()
@@ -597,7 +597,7 @@ func (b *builtinArithmeticMultiplyIntUnsignedSig) vecEvalInt(input *chunk.Chunk,
 	}
 	defer b.bufAllocator.put(buf)
 
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -612,7 +612,7 @@ func (b *builtinArithmeticMultiplyIntUnsignedSig) vecEvalInt(input *chunk.Chunk,
 
 		res = x[i] * y[i]
 		if x[i] != 0 && res/x[i] != y[i] {
-			return types.ErrOverflow.GenWithStackByArgs("BIGINT UNSIGNED", fmt.Sprintf("(%s * %s)", b.args[0].String(), b.args[1].String()))
+			return types.ErrOverflow.GenWithStackByArgs("BIGINT UNSIGNED", fmt.Sprintf("(%s * %s)", b.Args[0].String(), b.Args[1].String()))
 		}
 		x[i] = res
 	}
