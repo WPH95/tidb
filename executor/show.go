@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"sort"
 	"strconv"
 	"strings"
@@ -311,6 +312,7 @@ func (e *ShowExec) fetchShowTables() error {
 		} else {
 			tableTypes[v.Meta().Name.O] = "BASE TABLE"
 		}
+		fmt.Println("A", spew.Sdump(v.Meta()))
 	}
 	sort.Strings(tableNames)
 	for _, v := range tableNames {
@@ -343,6 +345,7 @@ func (e *ShowExec) fetchShowTableStatus() error {
 	       WHERE table_schema='%s' ORDER BY table_name`, e.DBName)
 
 	rows, _, err := e.ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(sql)
+
 
 	if err != nil {
 		return errors.Trace(err)
@@ -784,7 +787,11 @@ func (e *ShowExec) fetchShowCreateTable() error {
 
 	buf.WriteString("\n")
 
-	buf.WriteString(") ENGINE=InnoDB")
+	engine := tb.Meta().Engine
+	if engine == "" {
+		engine = "InnoDB????"
+	}
+	buf.WriteString(") ENGINE=" + engine)
 	// Because we only support case sensitive utf8_bin collate, we need to explicitly set the default charset and collation
 	// to make it work on MySQL server which has default collate utf8_general_ci.
 	if len(tblCollate) == 0 {

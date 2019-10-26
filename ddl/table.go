@@ -15,6 +15,7 @@ package ddl
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -74,6 +75,7 @@ func onCreateTable(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, _ error)
 			return ver, errors.Trace(err)
 		}
 		// Finish this job.
+		fmt.Println(spew.Sdump(tbInfo))
 		job.FinishTableJob(model.JobStateDone, model.StatePublic, ver, tbInfo)
 		asyncNotifyEvent(d, &util.Event{Tp: model.ActionCreateTable, TableInfo: tbInfo})
 		return ver, nil

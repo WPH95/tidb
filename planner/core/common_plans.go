@@ -698,6 +698,31 @@ func (e *Explain) RenderResult() error {
 	return nil
 }
 
+func getStoreStr(storeType kv.StoreType, pluginStoreType string) (string, error) {
+	switch storeType {
+	case kv.TiKV:
+		return "cop[tikv]", nil
+	case kv.TiFlash:
+		return "cop[tiflash]", nil
+	case kv.PluginStore:
+		return "cop[" + pluginStoreType + "]", nil
+	default:
+		return "", errors.Errorf("the store type %v is unknown", storeType)
+	}
+}
+
+func getTaskType(p Plan, taskTypeDefault string) (string, error) {
+	switch x := p.(type) {
+	case *PhysicalTableScan:
+		return getStoreStr(x.StoreType, x.PluginStoreType)
+	case *PhysicalIndexScan:
+		return getStoreStr(x.StoreType, x.PluginStoreType)
+	default:
+		return taskTypeDefault, nil
+	}
+
+}
+
 // explainPlanInRowFormat generates explain information for root-tasks.
 func (e *Explain) explainPlanInRowFormat(p Plan, taskType, indent string, isLastChild bool) (err error) {
 	e.prepareOperatorInfo(p, taskType, indent, isLastChild)
@@ -721,21 +746,24 @@ func (e *Explain) explainPlanInRowFormat(p Plan, taskType, indent string, isLast
 	switch x := p.(type) {
 	case *PhysicalTableReader:
 		var storeType string
-		switch x.StoreType {
-		case kv.TiKV:
-			storeType = "tikv"
-		case kv.TiFlash:
-			storeType = "tiflash"
-		default:
-			err = errors.Errorf("the store type %v is unknown", x.StoreType)
+		storeType, err = getStoreStr(x.StoreType, x.PluginStoreType)
+		if err != nil {
 			return
 		}
-		err = e.explainPlanInRowFormat(x.tablePlan, "cop["+storeType+"]", childIndent, true)
+		err = e.explainPlanInRowFormat(x.tablePlan, storeType, childIndent, true)
 	case *PhysicalIndexReader:
 		err = e.explainPlanInRowFormat(x.indexPlan, "cop[tikv]", childIndent, true)
 	case *PhysicalIndexLookUpReader:
-		err = e.explainPlanInRowFormat(x.indexPlan, "cop[tikv]", childIndent, false)
-		err = e.explainPlanInRowFormat(x.tablePlan, "cop[tikv]", childIndent, true)
+		taskType, err := getTaskType(x.indexPlan, "cop[tikv]")
+		if err != nil {
+			return err
+		}
+		err = e.explainPlanInRowFormat(x.indexPlan, taskType, childIndent, false)
+		taskType, err = getTaskType(x.tablePlan, "cop[tikv]")
+		if err != nil {
+			return err
+		}
+		err = e.explainPlanInRowFormat(x.tablePlan, taskType, childIndent, true)
 	case *PhysicalIndexMergeReader:
 		for i := 0; i < len(x.partialPlans); i++ {
 			if x.tablePlan == nil && i == len(x.partialPlans)-1 {

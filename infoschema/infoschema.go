@@ -71,6 +71,8 @@ var (
 	ErrTableLocked = terror.ClassSchema.New(codeTableLocked, mysql.MySQLErrName[mysql.ErrTableLocked])
 	// ErrAccessDenied return when the user doesn't have the permission to access the table.
 	ErrAccessDenied = terror.ClassSchema.New(codeErrAccessDenied, mysql.MySQLErrName[mysql.ErrAccessDenied])
+
+	ErrorEngineError = terror.ClassSchema.New(codeEngineError, "Got error %d from storage engine")
 )
 
 // InfoSchema is the interface used to retrieve the schema information.
@@ -320,6 +322,7 @@ func (h *Handle) EmptyClone() *Handle {
 // Schema error codes.
 const (
 	codeDBDropExists      terror.ErrCode = 1008
+	codeEngineError                      = 1030
 	codeDatabaseNotExists                = 1049
 	codeTableNotExists                   = 1146
 	codeColumnNotExists                  = 1054

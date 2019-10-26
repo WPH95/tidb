@@ -64,7 +64,8 @@ type PhysicalTableReader struct {
 	tablePlan  PhysicalPlan
 
 	// StoreType indicates table read from which type of store.
-	StoreType kv.StoreType
+	StoreType       kv.StoreType
+	PluginStoreType string
 }
 
 // GetPhysicalReader returns PhysicalTableReader for logical TableGather.
@@ -166,6 +167,10 @@ type PhysicalIndexScan struct {
 	// DoubleRead means if the index executor will read kv two times.
 	// If the query requires the columns that don't belong to index, DoubleRead will be true.
 	DoubleRead bool
+
+
+	StoreType       kv.StoreType
+	PluginStoreType string
 }
 
 // PhysicalMemTable reads memory table.
@@ -177,6 +182,7 @@ type PhysicalMemTable struct {
 	Columns     []*model.ColumnInfo
 	TableAsName *model.CIStr
 }
+
 
 // PhysicalTableScan represents a table scan plan.
 type PhysicalTableScan struct {
@@ -205,7 +211,8 @@ type PhysicalTableScan struct {
 	// HandleIdx is the index of handle, which is only used for admin check table.
 	HandleIdx int
 
-	StoreType kv.StoreType
+	StoreType       kv.StoreType
+	PluginStoreType string
 
 	// The table scan may be a partition, rather than a real table.
 	isPartition bool

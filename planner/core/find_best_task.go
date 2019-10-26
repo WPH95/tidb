@@ -14,8 +14,6 @@
 package core
 
 import (
-	"math"
-
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
@@ -32,6 +30,7 @@ import (
 	"github.com/pingcap/tidb/util/set"
 	"go.uber.org/zap"
 	"golang.org/x/tools/container/intsets"
+	"math"
 )
 
 const (
@@ -211,6 +210,47 @@ func (ds *DataSource) tryToGetMemTask(prop *property.PhysicalProperty) (task tas
 	}
 	return &rootTask{p: retPlan}, nil
 }
+
+//
+//func (ds *DataSource) tryToGetPluginTask(prop *property.PhysicalProperty, t task) (task task, err error) {
+//	if !prop.IsEmpty() {
+//		return nil, nil
+//	}
+//	if ds.tableInfo.Engine != "dashbase" {
+//		return nil, nil
+//	}
+//
+//	memTable := PhysicalMemTable{
+//		DBName:      ds.DBName,
+//		Table:       ds.tableInfo,
+//		Columns:     ds.Columns,
+//		TableAsName: ds.TableAsName,
+//	}.Init(ds.ctx, ds.stats, ds.blockOffset)
+//	memTable.SetSchema(ds.schema)
+//
+//	t.plan()
+//	// Stop to push down these conditions.
+//	var retPlan PhysicalPlan = t.plan()
+//	switch v := retPlan.(type) {
+//	case nil:
+//		return nil, nil
+//	case *PhysicalTableReader:
+//		return
+//
+//	default:
+//		return nil, nil
+//	}
+//
+//
+//	if len(ds.pushedDownConds) > 0 {
+//		sel := PhysicalSelection{
+//			Conditions: ds.pushedDownConds,
+//		}.Init(ds.ctx, ds.stats, ds.blockOffset)
+//		sel.SetChildren(memTable)
+//		retPlan = sel
+//	}
+//	return &rootTask{p: retPlan}, nil
+//}
 
 // tryToGetDualTask will check if the push down predicate has false constant. If so, it will return table dual.
 func (ds *DataSource) tryToGetDualTask() (task, error) {
@@ -422,6 +462,11 @@ func (ds *DataSource) findBestTask(prop *property.PhysicalProperty) (t task, err
 		return t, err
 	}
 
+	//t, err = ds.tryToGetPluginTask(prop, t)
+	//if err != nil || t != nil {
+	//	return t, err
+	//}
+
 	t = invalidTask
 	candidates := ds.skylinePruning(prop)
 	for _, candidate := range candidates {
@@ -576,6 +621,11 @@ func (ds *DataSource) buildIndexMergeTableScan(prop *property.PhysicalProperty, 
 		isPartition:     ds.isPartition,
 		physicalTableID: ds.physicalTableID,
 	}.Init(ds.ctx, ds.blockOffset)
+	if ds.tableInfo.Engine == "dashbase" {
+		ts.StoreType = kv.PluginStore
+		ts.PluginStoreType =ds.tableInfo.Engine
+	}
+
 	ts.SetSchema(ds.schema)
 	if ts.Table.PKIsHandle {
 		if pkColInfo := ts.Table.GetPkColInfo(); pkColInfo != nil {
@@ -673,6 +723,11 @@ func (ds *DataSource) convertToIndexScan(prop *property.PhysicalProperty, candid
 		}.Init(ds.ctx, is.blockOffset)
 		ts.SetSchema(ds.schema.Clone())
 		cop.tablePlan = ts
+		if ds.tableInfo.Engine == "dashbase" {
+			ts.StoreType = kv.PluginStore
+			ts.PluginStoreType =ds.tableInfo.Engine
+		}
+
 	}
 	cop.cst = cost
 	task = cop
@@ -957,6 +1012,11 @@ func (s *TableScan) GetPhysicalScan(schema *expression.Schema, stats *property.S
 		Ranges:          s.Ranges,
 		AccessCondition: s.AccessConds,
 	}.Init(s.ctx, s.blockOffset)
+	if ds.tableInfo.Engine == "dashbase" {
+		ts.StoreType = kv.PluginStore
+		ts.PluginStoreType =ds.tableInfo.Engine
+	}
+
 	ts.stats = stats
 	ts.SetSchema(schema)
 	if ts.Table.PKIsHandle {
@@ -1029,6 +1089,12 @@ func (ds *DataSource) getOriginalPhysicalTableScan(prop *property.PhysicalProper
 	} else {
 		ts.StoreType = kv.TiKV
 	}
+
+	if ds.tableInfo.Engine == "dashbase" {
+		ts.StoreType = kv.PluginStore
+		ts.PluginStoreType = ds.tableInfo.Engine
+	}
+
 	ts.SetSchema(ds.schema)
 	if ts.Table.PKIsHandle {
 		if pkColInfo := ts.Table.GetPkColInfo(); pkColInfo != nil {
@@ -1090,6 +1156,11 @@ func (ds *DataSource) getOriginalPhysicalIndexScan(prop *property.PhysicalProper
 		isPartition:      ds.isPartition,
 		physicalTableID:  ds.physicalTableID,
 	}.Init(ds.ctx, ds.blockOffset)
+	if ds.tableInfo.Engine == "dashbase" {
+		is.StoreType = kv.PluginStore
+		is.PluginStoreType =ds.tableInfo.Engine
+	}
+
 	statsTbl := ds.statisticTable
 	if statsTbl.Indices[idx.ID] != nil {
 		is.Hist = &statsTbl.Indices[idx.ID].Histogram
