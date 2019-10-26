@@ -51,7 +51,6 @@ func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) {
 }
 
 func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMeta) error {
-	chk.Reset()
 	if _, ok := Files[meta.Table.Name.L]; !ok {
 		fmt.Println("have some problem")
 		return nil

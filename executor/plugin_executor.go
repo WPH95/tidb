@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-type PluginExecutor struct {
+type PluginScanExecutor struct {
 	baseExecutor
 	Table   *model.TableInfo
 	Columns []*model.ColumnInfo
@@ -18,7 +18,7 @@ type PluginExecutor struct {
 	meta    *plugin.ExecutorMeta
 }
 
-func (e *PluginExecutor) Open(ctx context.Context) error {
+func (e *PluginScanExecutor) Open(ctx context.Context) error {
 	e.pm = plugin.DeclareEngineManifest(e.Plugin.Manifest)
 	e.meta = &plugin.ExecutorMeta{
 		Table: e.Table,
@@ -27,12 +27,13 @@ func (e *PluginExecutor) Open(ctx context.Context) error {
 	return nil
 }
 
-func (e *PluginExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
+func (e *PluginScanExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
+	chk.Reset()
 	err := e.pm.OnReaderNext(ctx, chk, e.meta)
 	fmt.Println("pe next finished", spew.Sdump(err))
 	return err
 }
 
-func (e *PluginExecutor) Close() error {
+func (e *PluginScanExecutor) Close() error {
 	return nil
 }

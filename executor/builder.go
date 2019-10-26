@@ -209,6 +209,8 @@ func (b *executorBuilder) build(p plannercore.Plan) Executor {
 		return b.buildSQLBindExec(v)
 	case *plannercore.SplitRegion:
 		return b.buildSplitRegion(v)
+	case *plannercore.PhysicalTableScan:
+		return b.buildTableScan(v)
 	default:
 		if mp, ok := p.(MockPhysicalPlan); ok {
 			return mp.GetExecutor()
@@ -1924,18 +1926,30 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 	return e, nil
 }
 
+func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Executor {
+
+	plugin.Get(plugin.Engine, "csv")
+	return &PluginScanExecutor{
+		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		Plugin:       plugin.Get(plugin.Engine, "csv"),
+		Table:        v.Table,
+		Columns:      v.Columns,
+	}
+}
+
 // buildTableReader builds a table reader executor. It first build a no range table reader,
 // and then update it ranges from table scan plan.
 func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) Executor {
 	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
 	if ts.Table.Engine == "csv" {
-		plugin.Get(plugin.Engine, "csv")
-		return &PluginExecutor{
-			baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
-			Plugin:       plugin.Get(plugin.Engine, "csv"),
-			Table:        ts.Table,
-			Columns:      ts.Columns,
+		if len(v.TablePlans) == 2 {
+			if tSelect, ok:=v.TablePlans[1].(*plannercore.PhysicalSelection);ok{
+				return b.buildSelection(tSelect)
+			}
+
 		}
+
+		return b.buildTableScan(ts)
 	}
 
 	ret, err := buildNoRangeTableReader(b, v)
