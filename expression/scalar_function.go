@@ -137,10 +137,10 @@ func newFunctionImpl(ctx sessionctx.Context, fold bool, funcName string, retType
 		return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", db+"."+funcName)
 	}
 
-	if funcName == "udf_trim" {
-		logutil.BgLogger().Info("check function success ",
-			zap.String("check function", funcName))
-	}
+	//if funcName == "udf_trim" {
+	//	logutil.BgLogger().Info("check function success ",
+	//		zap.String("check function", funcName))
+	//}
 
 	if !ctx.GetSessionVars().EnableNoopFuncs {
 		if _, ok := noopFuncs[funcName]; ok {
