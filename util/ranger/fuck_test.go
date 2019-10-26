@@ -11,148 +11,101 @@ import (
 
 const spaceChars = " "
 
-type TrimFunctionClass struct {
-	BaseFunctionClass
+type TrimFunction struct {
+	BaseBuiltinFunc
 }
 
-// getFunction sets trim built-in function signature.
-// The syntax of trim in mysql is 'TRIM([{BOTH | LEADING | TRAILING} [remstr] FROM] str), TRIM([remstr FROM] str)',
-// but we wil convert it into trim(str), trim(str, remstr) and trim(str, remstr, direction) in AST.
-func (c *TrimFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
-	if err := c.VerifyArgs(args); err != nil {
-		return nil, err
-	}
+func (b *TrimFunction) Clone() BuiltinFunc {
+	newSig := &TrimFunction{}
+	newSig.CloneFrom(&b.BaseBuiltinFunc)
+	return newSig
+}
 
+func (b *TrimFunction) Initial(ctx sessionctx.Context, args []Expression) BuiltinFunc {
+	var argTps []types.EvalType
 	switch len(args) {
 	case 1:
-		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETString)
-		argType := args[0].GetType()
-		bf.Tp.Flen = argType.Flen
-		SetBinFlagOrBinStr(argType, bf.Tp)
-		sig := &BuiltinTrim1ArgSig{bf}
-		return sig, nil
-
+		argTps = []types.EvalType{types.ETString}
 	case 2:
-		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETString, types.ETString)
-		argType := args[0].GetType()
-		SetBinFlagOrBinStr(argType, bf.Tp)
-		sig := &BuiltinTrim2ArgsSig{bf}
-		return sig, nil
-
+		argTps = []types.EvalType{types.ETString, types.ETString}
 	case 3:
-		bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, types.ETString, types.ETString, types.ETInt)
-		argType := args[0].GetType()
-		bf.Tp.Flen = argType.Flen
-		SetBinFlagOrBinStr(argType, bf.Tp)
-		sig := &BuiltinTrim3ArgsSig{bf}
-		return sig, nil
-
-	default:
-		return nil, c.VerifyArgs(args)
+		argTps = []types.EvalType{types.ETString, types.ETString, types.ETInt}
 	}
+
+	bf := NewBaseBuiltinFuncWithTp(ctx, args, types.ETString, argTps...)
+	argType := args[0].GetType()
+	bf.Tp.Flen = argType.Flen
+	SetBinFlagOrBinStr(argType, bf.Tp)
+	b.BaseBuiltinFunc = bf
+	return b
 }
 
-type BuiltinTrim1ArgSig struct {
-	BaseBuiltinFunc
-}
-
-func (b *BuiltinTrim1ArgSig) Clone() BuiltinFunc {
-	newSig := &BuiltinTrim1ArgSig{}
-	newSig.CloneFrom(&b.BaseBuiltinFunc)
-	return newSig
-}
-
-// evalString evals a builtinTrim1ArgSig, corresponding to trim(str)
-// See https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_trim
-func (b *BuiltinTrim1ArgSig) EvalString(row chunk.Row) (d string, isNull bool, err error) {
-	d, isNull, err = b.Args[0].EvalString(b.Ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	return strings.Trim(d, spaceChars), false, nil
-}
-
-type BuiltinTrim2ArgsSig struct {
-	BaseBuiltinFunc
-}
-
-func (b *BuiltinTrim2ArgsSig) Clone() BuiltinFunc {
-	newSig := &BuiltinTrim2ArgsSig{}
-	newSig.CloneFrom(&b.BaseBuiltinFunc)
-	return newSig
-}
-
-// evalString evals a builtinTrim2ArgsSig, corresponding to trim(str, remstr)
-// See https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_trim
-func (b *BuiltinTrim2ArgsSig) EvalString(row chunk.Row) (d string, isNull bool, err error) {
-	var str, remstr string
-
-	str, isNull, err = b.Args[0].EvalString(b.Ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	remstr, isNull, err = b.Args[1].EvalString(b.Ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	d = trimLeft(str, remstr)
-	d = trimRight(d, remstr)
-	return d, false, nil
-}
-
-type BuiltinTrim3ArgsSig struct {
-	BaseBuiltinFunc
-}
-
-func (b *BuiltinTrim3ArgsSig) Clone() BuiltinFunc {
-	newSig := &BuiltinTrim3ArgsSig{}
-	newSig.CloneFrom(&b.BaseBuiltinFunc)
-	return newSig
-}
-
-// evalString evals a builtinTrim3ArgsSig, corresponding to trim(str, remstr, direction)
-// See https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_trim
-func (b *BuiltinTrim3ArgsSig) EvalString(row chunk.Row) (d string, isNull bool, err error) {
-	var (
-		str, remstr  string
-		x            int64
-		direction    ast.TrimDirectionType
-		isRemStrNull bool
-	)
-	str, isNull, err = b.Args[0].EvalString(b.Ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	remstr, isRemStrNull, err = b.Args[1].EvalString(b.Ctx, row)
-	if err != nil {
-		return d, isNull, err
-	}
-	x, isNull, err = b.Args[2].EvalInt(b.Ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	direction = ast.TrimDirectionType(x)
-	if direction == ast.TrimLeading {
-		if isRemStrNull {
-			d = strings.TrimLeft(str, spaceChars)
-		} else {
-			d = trimLeft(str, remstr)
+func (b *TrimFunction) EvalString(row chunk.Row) (d string, isNull bool, err error) {
+	switch len(b.Args) {
+	case 1:
+		d, isNull, err = b.Args[0].EvalString(b.Ctx, row)
+		if isNull || err != nil {
+			return d, isNull, err
 		}
-	} else if direction == ast.TrimTrailing {
-		if isRemStrNull {
-			d = strings.TrimRight(str, spaceChars)
-		} else {
-			d = trimRight(str, remstr)
+		return strings.Trim(d, spaceChars), false, nil
+	case 2:
+		var str, remstr string
+
+		str, isNull, err = b.Args[0].EvalString(b.Ctx, row)
+		if isNull || err != nil {
+			return d, isNull, err
 		}
-	} else {
-		if isRemStrNull {
-			d = strings.Trim(str, spaceChars)
-		} else {
-			d = trimLeft(str, remstr)
-			d = trimRight(d, remstr)
+		remstr, isNull, err = b.Args[1].EvalString(b.Ctx, row)
+		if isNull || err != nil {
+			return d, isNull, err
 		}
+		d = trimLeft(str, remstr)
+		d = trimRight(d, remstr)
+		return d, false, nil
+	case 3:
+		var (
+			str, remstr  string
+			x            int64
+			direction    ast.TrimDirectionType
+			isRemStrNull bool
+		)
+		str, isNull, err = b.Args[0].EvalString(b.Ctx, row)
+		if isNull || err != nil {
+			return d, isNull, err
+		}
+		remstr, isRemStrNull, err = b.Args[1].EvalString(b.Ctx, row)
+		if err != nil {
+			return d, isNull, err
+		}
+		x, isNull, err = b.Args[2].EvalInt(b.Ctx, row)
+		if isNull || err != nil {
+			return d, isNull, err
+		}
+		direction = ast.TrimDirectionType(x)
+		if direction == ast.TrimLeading {
+			if isRemStrNull {
+				d = strings.TrimLeft(str, spaceChars)
+			} else {
+				d = trimLeft(str, remstr)
+			}
+		} else if direction == ast.TrimTrailing {
+			if isRemStrNull {
+				d = strings.TrimRight(str, spaceChars)
+			} else {
+				d = trimRight(str, remstr)
+			}
+		} else {
+			if isRemStrNull {
+				d = strings.Trim(str, spaceChars)
+			} else {
+				d = trimLeft(str, remstr)
+				d = trimRight(d, remstr)
+			}
+		}
+		return d, false, nil
 	}
-	return d, false, nil
+
+	return d, isNull, err
 }
 
 func trimLeft(str, remstr string) string {

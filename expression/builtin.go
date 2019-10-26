@@ -247,6 +247,10 @@ func (b *BaseBuiltinFunc) vectorized() bool {
 	return false
 }
 
+func (b *BaseBuiltinFunc) Initial(ctx sessionctx.Context, args []Expression) BuiltinFunc {
+	return nil
+}
+
 func (b *BaseBuiltinFunc) isChildrenVectorized() bool {
 	b.childrenVectorizedOnce.Do(func() {
 		b.childrenVectorized = true
@@ -405,6 +409,8 @@ type BuiltinFunc interface {
 	implicitArgs() []types.Datum
 	// Clone returns a copy of itself.
 	Clone() BuiltinFunc
+
+	Initial(ctx sessionctx.Context, args []Expression) BuiltinFunc
 }
 
 // baseFunctionClass will be contained in every struct that implement functionClass interface.
@@ -732,6 +738,25 @@ func IsFunctionSupported(name string) bool {
 	return ok
 }
 
-func AddUserDefinedFunction(name string, class FunctionClass) {
-	funcs[name] = class
+func AddUserDefinedFunction(name string, class BuiltinFunc, minArgs int, maxArgs int) {
+	funcs[name] = &UserDefinedFunctionClass{BaseFunctionClass{name, minArgs, maxArgs}}
+	userDefinedFuncs[name] = class
+}
+
+var userDefinedFuncs = map[string]BuiltinFunc{}
+
+type UserDefinedFunctionClass struct {
+	BaseFunctionClass
+}
+
+func (c *UserDefinedFunctionClass) GetFunction(ctx sessionctx.Context, args []Expression) (BuiltinFunc, error) {
+	if err := c.VerifyArgs(args); err != nil {
+		return nil, err
+	}
+
+	if userDefinedFuncs[c.FuncName] == nil {
+		return nil, c.VerifyArgs(args)
+	}
+
+	return userDefinedFuncs[c.FuncName].Initial(ctx, args), nil
 }
