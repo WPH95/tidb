@@ -211,7 +211,10 @@ func (r Row) GetRaw(colIdx int) []byte {
 
 // IsNull returns if the datum in the chunk.Row is null.
 func (r Row) IsNull(colIdx int) bool {
-	return r.c.columns[colIdx].IsNull(r.idx)
+	if colIdx < len(r.c.columns){
+		return r.c.columns[colIdx].IsNull(r.idx)
+	}
+	return true
 }
 
 // CopyConstruct creates a new row and copies this row's data into it.

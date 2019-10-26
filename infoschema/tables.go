@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"sort"
 	"sync"
 	"time"
@@ -969,6 +970,25 @@ func dataForEngines() (records [][]types.Datum) {
 			"YES", // Savepoints
 		),
 	)
+
+	thirdEngine := plugin.List(plugin.Engine)
+	for _, e := range thirdEngine {
+
+		records = append(records,
+			types.MakeDatums(
+				e.Name,  // Engine
+				"YES", // Support
+				"Created By Plugin :)", // Comment
+				"NO", // Transactions
+				"NO", // XA
+				"NO", // Savepoints
+			),
+		)
+
+	}
+
+
+
 	return records
 }
 
@@ -1268,7 +1288,7 @@ func dataForTables(ctx sessionctx.Context, schemas []*model.DBInfo) ([][]types.D
 					schema.Name.O, // TABLE_SCHEMA
 					table.Name.O,  // TABLE_NAME
 					"BASE TABLE",  // TABLE_TYPE
-					"InnoDB",      // ENGINE
+					table.Engine,  // ENGINE
 					uint64(10),    // VERSION
 					"Compact",     // ROW_FORMAT
 					rowCount,      // TABLE_ROWS
