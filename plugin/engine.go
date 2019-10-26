@@ -16,3 +16,12 @@ type EngineManifest struct {
 type ExecutorMeta struct {
 	Table *model.TableInfo
 }
+
+func HasEngine(name string) bool {
+	p := Get(Engine, name)
+	if p != nil {
+		return true
+	}
+
+	return false
+}

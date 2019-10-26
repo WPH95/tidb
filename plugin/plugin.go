@@ -415,6 +415,8 @@ func Get(kind Kind, name string) *Plugin {
 }
 
 
+
+
 func List(kind Kind) []Plugin {
 	plugins := pluginGlobal.plugins()
 	if plugins == nil {

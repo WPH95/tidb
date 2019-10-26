@@ -235,6 +235,7 @@ const (
 	TiKV StoreType = iota
 	// TiFlash means the type of a store is TiFlash.
 	TiFlash
+	PluginEngine
 )
 
 // Request represents a kv request.

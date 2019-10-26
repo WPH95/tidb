@@ -74,7 +74,7 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	manifest := plugin.EngineManifest{
 		Manifest: plugin.Manifest{
-			Name: "csv",
+			Name: "file",
 		},
 		OnReaderOpen: plugin.OnReaderOpen,
 		OnReaderNext: plugin.OnReaderNext,
@@ -88,7 +88,7 @@ func (s *testPlugin) TestPlugin(c *C) {
 	})
 
 	tk.MustExec("use test")
-	tk.MustExec("create table t1(a int, b char(255)) ENGINE = csv")
+	tk.MustExec("create table t1(a int, b char(255)) ENGINE = file")
 	result := tk.MustQuery("select * from t1")
 	result.Check(testkit.Rows("0 233333", "1 233333", "2 233333", "3 233333", "4 233333", "5 233333"))
 	result = tk.MustQuery("select * from t1 where a = 2")

@@ -1393,7 +1393,7 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 
 	engine := findTableOption(s.Options, ast.TableOptionEngine, "InnoDB")
 	var p *plugin.Plugin
-	if engine != "InnoDB" {
+	if plugin.HasEngine(engine) {
 		p = plugin.Get(plugin.Engine, engine)
 		if p == nil {
 			return infoschema.ErrorEngineError.GenWithStackByArgs(404)
