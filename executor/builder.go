@@ -711,15 +711,15 @@ func (b *executorBuilder) buildInsert(v *plannercore.Insert) Executor {
 		InsertValues: ivs,
 		OnDuplicate:  append(v.OnDuplicate, v.GenCols.OnDuplicates...),
 	}
+	fmt.Println(">>>>>", v.Table.Meta().Engine, v.Table.Meta().Name.String())
 	if plugin.HasEngine(v.Table.Meta().Engine) {
-		fmt.Println("EXEC")
 		return &PluginInsertExec{
+			Plugin:       plugin.Get(plugin.Engine, v.Table.Meta().Engine),
 			InsertE:      insert,
 			baseExecutor: baseExec,
 		}
 
 	}
-	fmt.Println(">>> ERROR")
 	return insert
 }
 

@@ -11,4 +11,9 @@ onShutdown = "OnShutdown"
 export = [
     {extPoint="OnReaderOpen", impl="OnReaderOpen"},
     {extPoint="OnReaderNext", impl="OnReaderNext"},
+    {extPoint="OnInsertOpen", impl="OnInsertOpen"},
+    {extPoint="OnInsertNext", impl="OnInsertNext"},
+    {extPoint="OnInsertClose", impl="OnInsertClose"},
+    {extPoint="OnCreateTable", impl="OnCreateTable"},
+    {extPoint="OnDropTable", impl="OnDropTable"},
 ]

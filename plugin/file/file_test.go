@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser"
 	"github.com/pingcap/tidb/domain"
@@ -69,9 +68,14 @@ func (s *testPlugin) TestPlugin(c *C) {
 		Manifest: plugin.Manifest{
 			Name: "file",
 		},
-		OnReaderOpen: OnReaderOpen,
-		OnReaderNext: OnReaderNext,
-		//OnReaderClose: plugin.OnReaderClose,
+		OnReaderOpen:  OnReaderOpen,
+		OnReaderNext:  OnReaderNext,
+		OnInsertOpen:  OnInsertOpen,
+		OnInsertNext:  OnInsertNext,
+		OnInsertClose: OnInsertClose,
+
+		OnCreateTable: OnCreateTable,
+		OnDropTable:   OnDropTable,
 	}
 	plugin.Set(plugin.Engine, &plugin.Plugin{
 		Manifest: plugin.ExportManifest(manifest),
@@ -82,13 +86,10 @@ func (s *testPlugin) TestPlugin(c *C) {
 
 	tk.MustExec("use test")
 	tk.MustExec("create table t1(a int, b char(255)) ENGINE = file")
+	tk.MustExec("insert into t1 values(1, 'lfkdsk')")
+	tk.MustExec("insert into t1 values(2, 'wph95')")
 	result := tk.MustQuery("select * from t1")
-	result.Check(testkit.Rows("0 233333", "1 233333", "2 233333", "3 233333", "4 233333", "5 233333"))
+	result.Check(testkit.Rows("1 lfkdsk","2 wph95"))
 	result = tk.MustQuery("select * from t1 where a = 2")
-	result.Check(testkit.Rows("2 233333", ))
-	result = tk.MustQuery("show engines")
-	fmt.Println(result.Rows())
-	result = tk.MustQuery("show table status")
-	fmt.Println(result.Rows())
-
+	result.Check(testkit.Rows("2 wph95", ))
 }

@@ -1,8 +1,6 @@
 package executor
 
 import (
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/util/chunk"
@@ -23,8 +21,7 @@ func (e *PluginScanExecutor) Open(ctx context.Context) error {
 	e.meta = &plugin.ExecutorMeta{
 		Table: e.Table,
 	}
-	e.pm.OnReaderOpen(ctx, e.meta)
-	return nil
+	return e.pm.OnReaderOpen(ctx, e.meta)
 }
 
 func (e *PluginScanExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
@@ -50,13 +47,15 @@ func (e *PluginInsertExec) Open(ctx context.Context) error {
 	e.meta = &plugin.ExecutorMeta{
 		Table: e.InsertE.Table.Meta(),
 	}
-	e.pm.OnInsertOpen(ctx, e.meta)
-	return nil
+	return e.pm.OnInsertOpen(ctx, e.meta)
 }
 
 
 func (e *PluginInsertExec) Next(ctx context.Context, req *chunk.Chunk) error {
-	return e.pm.OnReaderNext(ctx, e.InsertE.Lists, e.meta)
+	return e.pm.OnInsertNext(ctx, e.InsertE.Lists, e.meta)
 }
 
+func (e *PluginInsertExec) Close() error {
+	return e.pm.OnInsertClose(e.meta)
+}
 

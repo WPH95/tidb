@@ -9,12 +9,16 @@ import (
 
 type EngineManifest struct {
 	Manifest
-	OnReaderOpen  func(ctx context.Context, meta *ExecutorMeta)
-	OnReaderNext  func(ctx context.Context, rows [][]expression.Expression, meta *ExecutorMeta) error
+	OnInsertOpen  func(ctx context.Context, meta *ExecutorMeta) error
+	OnInsertNext  func(ctx context.Context, rows [][]expression.Expression, meta *ExecutorMeta) error
+	OnInsertClose func(meta *ExecutorMeta) error
+
+	OnReaderOpen  func(ctx context.Context, meta *ExecutorMeta) error
+	OnReaderNext  func(ctx context.Context, chk *chunk.Chunk, meta *ExecutorMeta) error
 	OnReaderClose func(meta ExecutorMeta)
 
-	OnInsertOpen func(ctx context.Context, meta *ExecutorMeta)
-	OnInsertNext func(ctx context.Context, chk *chunk.Chunk, meta *ExecutorMeta) error
+	OnDropTable   func(tb *model.TableInfo) error
+	OnCreateTable func(tb *model.TableInfo) error
 }
 
 type ExecutorMeta struct {

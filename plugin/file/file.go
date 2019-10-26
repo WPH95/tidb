@@ -14,17 +14,24 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"github.com/pingcap/parser/model"
+	"github.com/pingcap/tidb/expression"
 	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/util/chunk"
+	"io"
+	"os"
+	"strconv"
+	"strings"
 )
 
 type ReadExecutor struct {
 	pos int
 }
 
-var Files = make(map[string]*ReadExecutor)
+var Files = make(map[string]*bufio.Reader)
 
 // Validate implements TiDB plugin's Validate SPI.
 func Validate(ctx context.Context, m *plugin.Manifest) error {
@@ -44,22 +51,75 @@ func OnShutdown(ctx context.Context, manifest *plugin.Manifest) error {
 	return nil
 }
 
-func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) {
-	Files[meta.Table.Name.L] = &ReadExecutor{
-		pos: 0,
+func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
+	path := fmt.Sprintf("/tmp/%s.log", meta.Table.Name.L)
+	file, err := os.Open(path)
+	if err != nil {
+		return err
 	}
+	Files[meta.Table.Name.L] = bufio.NewReader(file)
+	return nil
 }
 
 func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMeta) error {
-	if _, ok := Files[meta.Table.Name.L]; !ok {
-		return nil
+	chk.Reset()
+	reader := Files[meta.Table.Name.L]
+	line, _, err := reader.ReadLine()
+	if err != nil {
+		if err == io.EOF {
+			return nil
+		}
+		return err
 	}
-	e := Files[meta.Table.Name.L]
-	if e.pos > 5 {
-		return nil
+	es := strings.Split(string(line), ",")
+	i, err := strconv.Atoi(es[0])
+	if err !=nil {
+		chk.AppendNull(0)
+	} else {
+		chk.AppendInt64(0, int64(i))
 	}
-	chk.AppendInt64(0, int64(e.pos))
-	chk.AppendString(1, "233333")
-	e.pos += 1
+	chk.AppendString(1, es[1])
 	return nil
+}
+
+var InsertFiles = make(map[string]*os.File)
+
+func OnInsertOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
+	path := fmt.Sprintf("/tmp/%s.log", meta.Table.Name.L)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	InsertFiles[meta.Table.Name.L] = f
+	return err
+}
+
+func OnInsertNext(ctx context.Context, rows [][]expression.Expression, meta *plugin.ExecutorMeta) error {
+	for _, row := range rows {
+		b := strings.Builder{}
+		for _, e := range row {
+			b.WriteString(e.String() + ",")
+		}
+		b.WriteString("\n")
+		_, err := InsertFiles[meta.Table.Name.L].WriteString(b.String())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func OnInsertClose(meta *plugin.ExecutorMeta) error {
+	return InsertFiles[meta.Table.Name.L].Close()
+}
+
+func OnCreateTable(tblInfo *model.TableInfo) error {
+	path := fmt.Sprintf("/tmp/%s.log", tblInfo.Name.L)
+	f, err :=os.Create(path)
+	if err != nil {
+		return err
+	}
+	return f.Close()
+}
+
+func OnDropTable(tblInfo *model.TableInfo) error {
+	path := fmt.Sprintf("/tmp/%s.log", tblInfo.Name.L)
+	return os.Remove(path)
 }
