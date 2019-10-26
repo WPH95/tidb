@@ -21,8 +21,7 @@ func (e *PluginScanExecutor) Open(ctx context.Context) error {
 	e.meta = &plugin.ExecutorMeta{
 		Table: e.Table,
 	}
-	e.pm.OnReaderOpen(ctx, e.meta)
-	return nil
+	return e.pm.OnReaderOpen(ctx, e.meta)
 }
 
 func (e *PluginScanExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
@@ -34,3 +33,29 @@ func (e *PluginScanExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
 func (e *PluginScanExecutor) Close() error {
 	return nil
 }
+
+type PluginInsertExec struct {
+	baseExecutor
+	Plugin  *plugin.Plugin
+	pm      *plugin.EngineManifest
+	InsertE *InsertExec
+	meta    *plugin.ExecutorMeta
+}
+
+func (e *PluginInsertExec) Open(ctx context.Context) error {
+	e.pm = plugin.DeclareEngineManifest(e.Plugin.Manifest)
+	e.meta = &plugin.ExecutorMeta{
+		Table: e.InsertE.Table.Meta(),
+	}
+	return e.pm.OnInsertOpen(ctx, e.meta)
+}
+
+
+func (e *PluginInsertExec) Next(ctx context.Context, req *chunk.Chunk) error {
+	return e.pm.OnInsertNext(ctx, e.InsertE.Lists, e.meta)
+}
+
+func (e *PluginInsertExec) Close() error {
+	return e.pm.OnInsertClose(e.meta)
+}
+

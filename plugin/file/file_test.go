@@ -59,13 +59,6 @@ var _ = Suite(&testPlugin{&baseTestSuite{}})
 type testPlugin struct{ *baseTestSuite }
 
 func TestPlugin(t *testing.T) {
-	//rescueStdout := os.Stdout
-	//_, w, _ := os.Pipe()
-	//os.Stdout = w
-	//
-	//os.Stdout = rescueStdout
-	//
-	//runConf := RunConf{Output: rescueStdout, Verbose: true, KeepWorkDir: true}
 	TestingT(t)
 }
 
@@ -73,11 +66,16 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	manifest := &plugin.EngineManifest{
 		Manifest: plugin.Manifest{
-			Name: "csv",
+			Name: "file",
 		},
-		OnReaderOpen: OnReaderOpen,
-		OnReaderNext: OnReaderNext,
-		//OnReaderClose: plugin.OnReaderClose,
+		OnReaderOpen:  OnReaderOpen,
+		OnReaderNext:  OnReaderNext,
+		OnInsertOpen:  OnInsertOpen,
+		OnInsertNext:  OnInsertNext,
+		OnInsertClose: OnInsertClose,
+
+		OnCreateTable: OnCreateTable,
+		OnDropTable:   OnDropTable,
 	}
 	plugin.Set(plugin.Engine, &plugin.Plugin{
 		Manifest: plugin.ExportManifest(manifest),
@@ -87,9 +85,11 @@ func (s *testPlugin) TestPlugin(c *C) {
 	})
 
 	tk.MustExec("use test")
-	tk.MustExec("create table t1(a int, b char(255)) ENGINE = csv")
+	tk.MustExec("create table t1(a int, b char(255)) ENGINE = file")
+	tk.MustExec("insert into t1 values(1, 'lfkdsk')")
+	tk.MustExec("insert into t1 values(2, 'wph95')")
 	result := tk.MustQuery("select * from t1")
-	result.Check(testkit.Rows("0 233333", "1 233333", "2 233333", "3 233333", "4 233333", "5 233333"))
+	result.Check(testkit.Rows("1 lfkdsk","2 wph95"))
 	result = tk.MustQuery("select * from t1 where a = 2")
-	result.Check(testkit.Rows("2 233333", ))
+	result.Check(testkit.Rows("2 wph95", ))
 }

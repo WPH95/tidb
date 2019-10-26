@@ -72,7 +72,7 @@ var (
 	// ErrAccessDenied return when the user doesn't have the permission to access the table.
 	ErrAccessDenied = terror.ClassSchema.New(codeErrAccessDenied, mysql.MySQLErrName[mysql.ErrAccessDenied])
 	// ErrAccessDenied return when the user use custom engine have errors.
-	ErrorEngineError = terror.ClassSchema.New(codeEngineError, "Got error %d from storage engine")
+	ErrorEngineError = terror.ClassSchema.New(codeEngineError, "Got error %s from storage engine")
 )
 
 // InfoSchema is the interface used to retrieve the schema information.

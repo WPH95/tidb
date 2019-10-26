@@ -14,6 +14,7 @@
 package core
 
 import (
+	"github.com/pingcap/tidb/plugin"
 	"math"
 
 	"github.com/pingcap/parser/ast"
@@ -576,6 +577,10 @@ func (ds *DataSource) buildIndexMergeTableScan(prop *property.PhysicalProperty, 
 		isPartition:     ds.isPartition,
 		physicalTableID: ds.physicalTableID,
 	}.Init(ds.ctx, ds.blockOffset)
+	if plugin.HasEngine(ds.tableInfo.Engine) {
+		ts.StoreType = kv.PluginEngine
+		ts.EngineName =ds.tableInfo.Engine
+	}
 	ts.SetSchema(ds.schema)
 	if ts.Table.PKIsHandle {
 		if pkColInfo := ts.Table.GetPkColInfo(); pkColInfo != nil {
@@ -671,6 +676,10 @@ func (ds *DataSource) convertToIndexScan(prop *property.PhysicalProperty, candid
 			isPartition:     ds.isPartition,
 			physicalTableID: ds.physicalTableID,
 		}.Init(ds.ctx, is.blockOffset)
+		if plugin.HasEngine(ds.tableInfo.Engine) {
+			ts.StoreType = kv.PluginEngine
+			ts.EngineName =ds.tableInfo.Engine
+		}
 		ts.SetSchema(ds.schema.Clone())
 		cop.tablePlan = ts
 	}
@@ -957,6 +966,10 @@ func (s *TableScan) GetPhysicalScan(schema *expression.Schema, stats *property.S
 		Ranges:          s.Ranges,
 		AccessCondition: s.AccessConds,
 	}.Init(s.ctx, s.blockOffset)
+	if plugin.HasEngine(ds.tableInfo.Engine) {
+		ts.StoreType = kv.PluginEngine
+		ts.EngineName =ds.tableInfo.Engine
+	}
 	ts.stats = stats
 	ts.SetSchema(schema)
 	if ts.Table.PKIsHandle {
@@ -1021,6 +1034,7 @@ func (ds *DataSource) getOriginalPhysicalTableScan(prop *property.PhysicalProper
 		AccessCondition: path.accessConds,
 		filterCondition: path.tableFilters,
 	}.Init(ds.ctx, ds.blockOffset)
+
 	if ds.preferStoreType&preferTiFlash != 0 {
 		ts.StoreType = kv.TiFlash
 		ts.filterCondition = append(ts.filterCondition, ts.AccessCondition...)
@@ -1028,6 +1042,10 @@ func (ds *DataSource) getOriginalPhysicalTableScan(prop *property.PhysicalProper
 		ts.Ranges = ranger.FullIntRange(false)
 	} else {
 		ts.StoreType = kv.TiKV
+	}
+	if plugin.HasEngine(ds.tableInfo.Engine) {
+		ts.StoreType = kv.PluginEngine
+		ts.EngineName =ds.tableInfo.Engine
 	}
 	ts.SetSchema(ds.schema)
 	if ts.Table.PKIsHandle {
@@ -1090,6 +1108,10 @@ func (ds *DataSource) getOriginalPhysicalIndexScan(prop *property.PhysicalProper
 		isPartition:      ds.isPartition,
 		physicalTableID:  ds.physicalTableID,
 	}.Init(ds.ctx, ds.blockOffset)
+	if plugin.HasEngine(ds.tableInfo.Engine){
+		is.StoreType = kv.PluginEngine
+		is.EngineName = ds.tableInfo.Engine
+	}
 	statsTbl := ds.statisticTable
 	if statsTbl.Indices[idx.ID] != nil {
 		is.Hist = &statsTbl.Indices[idx.ID].Histogram

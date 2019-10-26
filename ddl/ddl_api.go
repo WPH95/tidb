@@ -1396,9 +1396,16 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 	if engine != "InnoDB" {
 		p = plugin.Get(plugin.Engine, engine)
 		if p == nil {
-			return infoschema.ErrorEngineError.GenWithStackByArgs(404)
+			return infoschema.ErrorEngineError.GenWithStackByArgs("not found engine:'" + engine + "'")
 		}
 		tbInfo.Engine = engine
+		pm := plugin.DeclareEngineManifest(p.Manifest)
+		err = pm.OnCreateTable(tbInfo)
+		if err != nil {
+			return err
+		}
+	} else {
+		tbInfo.Engine = "InnoDB"
 	}
 
 	tbInfo.State = model.StatePublic
@@ -3113,6 +3120,15 @@ func (d *ddl) DropTable(ctx sessionctx.Context, ti ast.Ident) (err error) {
 	schema, tb, err := d.getSchemaAndTableByIdent(ctx, ti)
 	if err != nil {
 		return errors.Trace(err)
+	}
+
+	if plugin.HasEngine(tb.Meta().Engine) {
+		p := plugin.Get(plugin.Engine, tb.Meta().Engine)
+		pm := plugin.DeclareEngineManifest(p.Manifest)
+		err = pm.OnDropTable(tb.Meta())
+		if err != nil {
+			return err
+		}
 	}
 
 	job := &model.Job{
