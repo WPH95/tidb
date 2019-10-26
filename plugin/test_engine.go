@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package plugin
 
 import (
 	"context"
 	"fmt"
-	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/util/chunk"
 )
 
@@ -27,31 +26,32 @@ type ReadExecutor struct {
 var Files = make(map[string]*ReadExecutor)
 
 // Validate implements TiDB plugin's Validate SPI.
-func Validate(ctx context.Context, m *plugin.Manifest) error {
+func Validate(ctx context.Context, m *Manifest) error {
 	fmt.Println("csv plugin validate")
 	return nil
 }
 
 // OnInit implements TiDB plugin's OnInit SPI.
-func OnInit(ctx context.Context, manifest *plugin.Manifest) error {
+func OnInit(ctx context.Context, manifest *Manifest) error {
 	fmt.Println("csv init called")
 	return nil
 }
 
 // OnShutdown implements TiDB plugin's OnShutdown SPI.
-func OnShutdown(ctx context.Context, manifest *plugin.Manifest) error {
+func OnShutdown(ctx context.Context, manifest *Manifest) error {
 	fmt.Println("csv shutdown called")
 	return nil
 }
 
-func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) {
+func OnReaderOpen(ctx context.Context, meta *ExecutorMeta) {
 	Files[meta.Table.Name.L] = &ReadExecutor{
 		pos: 0,
 	}
 }
 
-func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMeta) error {
+func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *ExecutorMeta) error {
 	if _, ok := Files[meta.Table.Name.L]; !ok {
+		fmt.Println("have some problem")
 		return nil
 	}
 	e := Files[meta.Table.Name.L]

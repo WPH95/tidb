@@ -3948,9 +3948,7 @@ func (s *testSuite6) TearDownTest(c *C) {
 	}
 }
 
-type testSuite7 struct {
-	*baseTestSuite
-}
+
 
 func (s *testSuite7) TearDownTest(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
@@ -5052,4 +5050,8 @@ func (s *testSuiteP2) TestPointUpdatePreparedPlanWithCommitMode(c *C) {
 	tk1.MustExec("commit")
 
 	tk2.MustQuery("select * from t where a = 3").Check(testkit.Rows("3 3 11"))
+}
+
+type testSuite7 struct {
+	*baseTestSuite
 }
