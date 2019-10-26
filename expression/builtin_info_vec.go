@@ -106,7 +106,7 @@ func (b *builtinLastInsertIDSig) vecEvalInt(input *chunk.Chunk, result *chunk.Co
 	n := input.NumRows()
 	result.ResizeInt64(n, false)
 	i64s := result.Int64s()
-	res := int64(b.ctx.GetSessionVars().StmtCtx.PrevLastInsertID)
+	res := int64(b.Ctx.GetSessionVars().StmtCtx.PrevLastInsertID)
 	for i := 0; i < n; i++ {
 		i64s[i] = res
 	}

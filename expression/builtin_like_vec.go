@@ -67,7 +67,7 @@ func (b *builtinRegexpSharedSig) vecEvalInt(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(bufExpr)
-	if err := b.args[0].VecEvalString(b.ctx, input, bufExpr); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, bufExpr); err != nil {
 		return err
 	}
 
@@ -76,11 +76,11 @@ func (b *builtinRegexpSharedSig) vecEvalInt(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(bufPat)
-	if err := b.args[1].VecEvalString(b.ctx, input, bufPat); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, bufPat); err != nil {
 		return err
 	}
 
-	if b.args[1].ConstItem() && !b.isMemoizedRegexpInitialized() {
+	if b.Args[1].ConstItem() && !b.isMemoizedRegexpInitialized() {
 		b.initMemoizedRegexp(bufPat, n)
 	}
 	getRegexp := func(pat string) (*regexp.Regexp, error) {

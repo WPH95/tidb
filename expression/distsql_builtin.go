@@ -40,10 +40,10 @@ func PbTypeToFieldType(tp *tipb.FieldType) *types.FieldType {
 	}
 }
 
-func getSignatureByPB(ctx sessionctx.Context, sigCode tipb.ScalarFuncSig, tp *tipb.FieldType, args []Expression) (f builtinFunc, e error) {
+func getSignatureByPB(ctx sessionctx.Context, sigCode tipb.ScalarFuncSig, tp *tipb.FieldType, args []Expression) (f BuiltinFunc, e error) {
 	fieldTp := PbTypeToFieldType(tp)
 	base := newBaseBuiltinFunc(ctx, args)
-	base.tp = fieldTp
+	base.Tp = fieldTp
 	switch sigCode {
 	case tipb.ScalarFuncSig_CastIntAsInt:
 		f = &builtinCastIntAsIntSig{newBaseBuiltinCastFunc(base, false)}

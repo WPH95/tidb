@@ -55,7 +55,7 @@ func (b *builtinDecodeSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err1 := b.bufAllocator.get(types.ETString, n)
@@ -63,7 +63,7 @@ func (b *builtinDecodeSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err1
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	result.ReserveString(n)
@@ -94,7 +94,7 @@ func (b *builtinEncodeSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err1 := b.bufAllocator.get(types.ETString, n)
@@ -102,7 +102,7 @@ func (b *builtinEncodeSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err1
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	result.ReserveString(n)
@@ -149,7 +149,7 @@ func (b *builtinMD5Sig) vecEvalString(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ReserveString(n)
@@ -183,7 +183,7 @@ func (b *builtinSHA2Sig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETInt, n)
@@ -191,7 +191,7 @@ func (b *builtinSHA2Sig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	result.ReserveString(n)
@@ -274,7 +274,7 @@ func (b *builtinPasswordSig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ReserveString(n)
@@ -290,7 +290,7 @@ func (b *builtinPasswordSig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		}
 		// We should append a warning here because function "PASSWORD" is deprecated since MySQL 5.7.6.
 		// See https://dev.mysql.com/doc/refman/5.7/en/encryption-functions.html#function_password
-		b.ctx.GetSessionVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoReplacement.GenWithStackByArgs("PASSWORD"))
+		b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoReplacement.GenWithStackByArgs("PASSWORD"))
 
 		result.AppendString(auth.EncodePassword(pass))
 	}
@@ -308,7 +308,7 @@ func (b *builtinSHA1Sig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ReserveString(n)

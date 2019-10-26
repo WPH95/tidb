@@ -31,7 +31,7 @@ import (
 func (s *testEvaluatorSuite) TestDatabase(c *C) {
 	fc := funcs[ast.Database]
 	ctx := mock.NewContext()
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -45,7 +45,7 @@ func (s *testEvaluatorSuite) TestDatabase(c *C) {
 	// Test case for schema().
 	fc = funcs[ast.Schema]
 	c.Assert(fc, NotNil)
-	f, err = fc.getFunction(ctx, nil)
+	f, err = fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err = evalBuiltinFunc(f, chunk.MutRowFromDatums(types.MakeDatums()).ToRow())
 	c.Assert(err, IsNil)
@@ -59,7 +59,7 @@ func (s *testEvaluatorSuite) TestFoundRows(c *C) {
 	sessionVars.LastFoundRows = 2
 
 	fc := funcs[ast.FoundRows]
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -72,7 +72,7 @@ func (s *testEvaluatorSuite) TestUser(c *C) {
 	sessionVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
 
 	fc := funcs[ast.User]
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -86,7 +86,7 @@ func (s *testEvaluatorSuite) TestCurrentUser(c *C) {
 	sessionVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "localhost"}
 
 	fc := funcs[ast.CurrentUser]
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -102,7 +102,7 @@ func (s *testEvaluatorSuite) TestCurrentRole(c *C) {
 	sessionVars.ActiveRoles = append(sessionVars.ActiveRoles, &auth.RoleIdentity{Username: "r_2", Hostname: "localhost"})
 
 	fc := funcs[ast.CurrentRole]
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -116,7 +116,7 @@ func (s *testEvaluatorSuite) TestConnectionID(c *C) {
 	sessionVars.ConnectionID = uint64(1)
 
 	fc := funcs[ast.ConnectionID]
-	f, err := fc.getFunction(ctx, nil)
+	f, err := fc.GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -126,7 +126,7 @@ func (s *testEvaluatorSuite) TestConnectionID(c *C) {
 
 func (s *testEvaluatorSuite) TestVersion(c *C) {
 	fc := funcs[ast.Version]
-	f, err := fc.getFunction(s.ctx, nil)
+	f, err := fc.GetFunction(s.ctx, nil)
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -172,21 +172,21 @@ func (s *testEvaluatorSuite) TestBenchMark(c *C) {
 
 func (s *testEvaluatorSuite) TestCharset(c *C) {
 	fc := funcs[ast.Charset]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
 	c.Assert(f, IsNil)
 	c.Assert(err, ErrorMatches, "*FUNCTION CHARSET does not exist")
 }
 
 func (s *testEvaluatorSuite) TestCoercibility(c *C) {
 	fc := funcs[ast.Coercibility]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
 	c.Assert(f, IsNil)
 	c.Assert(err, ErrorMatches, "*FUNCTION COERCIBILITY does not exist")
 }
 
 func (s *testEvaluatorSuite) TestCollation(c *C) {
 	fc := funcs[ast.Collation]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
 	c.Assert(f, IsNil)
 	c.Assert(err, ErrorMatches, "*FUNCTION COLLATION does not exist")
 }
@@ -196,7 +196,7 @@ func (s *testEvaluatorSuite) TestRowCount(c *C) {
 	sessionVars := ctx.GetSessionVars()
 	sessionVars.StmtCtx.PrevAffectedRows = 10
 
-	f, err := funcs[ast.RowCount].getFunction(ctx, nil)
+	f, err := funcs[ast.RowCount].GetFunction(ctx, nil)
 	c.Assert(err, IsNil)
 	c.Assert(f, NotNil)
 	sig, ok := f.(*builtinRowCountSig)
@@ -269,6 +269,6 @@ func (s *testEvaluatorSuite) TestLastInsertID(c *C) {
 		}
 	}
 
-	_, err := funcs[ast.LastInsertId].getFunction(s.ctx, []Expression{Zero})
+	_, err := funcs[ast.LastInsertId].GetFunction(s.ctx, []Expression{Zero})
 	c.Assert(err, IsNil)
 }

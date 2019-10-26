@@ -32,7 +32,7 @@ func (b *builtinJSONDepthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalJSON(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ResizeInt64(n, false)
@@ -59,7 +59,7 @@ func (b *builtinJSONKeysSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalJSON(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (b *builtinJSONQuoteSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalJSON(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -263,7 +263,7 @@ func (b *builtinJSONTypeSig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalJSON(b.Ctx, input, buf); err != nil {
 		return err
 	}
 

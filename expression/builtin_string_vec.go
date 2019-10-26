@@ -29,10 +29,10 @@ import (
 )
 
 func (b *builtinLowerSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) error {
-	if err := b.args[0].VecEvalString(b.ctx, input, result); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, result); err != nil {
 		return err
 	}
-	if types.IsBinaryStr(b.args[0].GetType()) {
+	if types.IsBinaryStr(b.Args[0].GetType()) {
 		return nil
 	}
 
@@ -64,7 +64,7 @@ func (b *builtinRepeatSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -73,7 +73,7 @@ func (b *builtinRepeatSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf2); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -97,11 +97,11 @@ func (b *builtinRepeatSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		str := buf.GetString(i)
 		byteLength := len(str)
 		if uint64(byteLength)*uint64(num) > b.maxAllowedPacket {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
-		if int64(byteLength) > int64(b.tp.Flen)/num {
+		if int64(byteLength) > int64(b.Tp.Flen)/num {
 			result.AppendNull()
 			continue
 		}
@@ -121,7 +121,7 @@ func (b *builtinStringIsNullSig) vecEvalInt(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -142,10 +142,10 @@ func (b *builtinStringIsNullSig) vectorized() bool {
 }
 
 func (b *builtinUpperSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) error {
-	if err := b.args[0].VecEvalString(b.ctx, input, result); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, result); err != nil {
 		return err
 	}
-	if types.IsBinaryStr(b.args[0].GetType()) {
+	if types.IsBinaryStr(b.Args[0].GetType()) {
 		return nil
 	}
 
@@ -177,7 +177,7 @@ func (b *builtinLeftSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -186,7 +186,7 @@ func (b *builtinLeftSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf2); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -222,7 +222,7 @@ func (b *builtinRightSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -231,7 +231,7 @@ func (b *builtinRightSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf2); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -270,7 +270,7 @@ func (b *builtinSpaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -286,7 +286,7 @@ func (b *builtinSpaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 			num = 0
 		}
 		if uint64(num) > b.maxAllowedPacket {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -306,7 +306,7 @@ func (b *builtinSpaceSig) vectorized() bool {
 // vecEvalString evals a REVERSE(str).
 // See https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_reverse
 func (b *builtinReverseSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) error {
-	if err := b.args[0].VecEvalString(b.ctx, input, result); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, result); err != nil {
 		return err
 	}
 
@@ -345,7 +345,7 @@ func (b *builtinLocate3ArgsSig) vecEvalInt(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETString, n)
@@ -353,11 +353,11 @@ func (b *builtinLocate3ArgsSig) vecEvalInt(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	// store positions in result
-	if err := b.args[2].VecEvalInt(b.ctx, input, result); err != nil {
+	if err := b.Args[2].VecEvalInt(b.Ctx, input, result); err != nil {
 		return err
 	}
 
@@ -416,7 +416,7 @@ func (b *builtinLTrimSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -493,7 +493,7 @@ func (b *builtinUnHexSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -538,7 +538,7 @@ func (b *builtinASCIISig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) e
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err = b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err = b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -580,7 +580,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETInt, n)
@@ -588,7 +588,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	buf2, err := b.bufAllocator.get(types.ETString, n)
@@ -596,7 +596,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[2].VecEvalString(b.ctx, input, buf2); err != nil {
+	if err := b.Args[2].VecEvalString(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -609,7 +609,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength)*uint64(mysql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -622,7 +622,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		runeLength := len([]rune(str))
 		padLength := len([]rune(padStr))
 
-		if targetLength < 0 || targetLength*4 > b.tp.Flen || (runeLength < targetLength && padLength == 0) {
+		if targetLength < 0 || targetLength*4 > b.Tp.Flen || (runeLength < targetLength && padLength == 0) {
 			result.AppendNull()
 			continue
 		}
@@ -672,7 +672,7 @@ func (b *builtinRTrimSig) vecEvalString(input *chunk.Chunk, result *chunk.Column
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -767,7 +767,7 @@ func (b *builtinTrim2ArgsSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETString, n)
@@ -775,7 +775,7 @@ func (b *builtinTrim2ArgsSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 
@@ -821,7 +821,7 @@ func (b *builtinOctStringSig) vecEvalString(input *chunk.Chunk, result *chunk.Co
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -878,7 +878,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETInt, n)
@@ -886,7 +886,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	buf2, err := b.bufAllocator.get(types.ETInt, n)
@@ -894,7 +894,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[2].VecEvalInt(b.ctx, input, buf2); err != nil {
+	if err := b.Args[2].VecEvalInt(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 	buf3, err := b.bufAllocator.get(types.ETString, n)
@@ -902,7 +902,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf3)
-	if err := b.args[3].VecEvalString(b.ctx, input, buf3); err != nil {
+	if err := b.Args[3].VecEvalString(b.Ctx, input, buf3); err != nil {
 		return err
 	}
 
@@ -933,7 +933,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		strHead := string(runes[0 : pos-1])
 		strTail := string(runes[pos+length-1:])
 		if uint64(len(strHead)+len(newstr)+len(strTail)) > b.maxAllowedPacket {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -995,7 +995,7 @@ func (b *builtinLengthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1025,7 +1025,7 @@ func (b *builtinLocate2ArgsSig) vecEvalInt(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETString, n)
@@ -1033,7 +1033,7 @@ func (b *builtinLocate2ArgsSig) vecEvalInt(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 
@@ -1093,7 +1093,7 @@ func (b *builtinReplaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Colu
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETString, n)
@@ -1101,7 +1101,7 @@ func (b *builtinReplaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Colu
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalString(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalString(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	buf2, err := b.bufAllocator.get(types.ETString, n)
@@ -1109,7 +1109,7 @@ func (b *builtinReplaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Colu
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[2].VecEvalString(b.ctx, input, buf2); err != nil {
+	if err := b.Args[2].VecEvalString(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -1151,7 +1151,7 @@ func (b *builtinOctIntSig) vecEvalString(input *chunk.Chunk, result *chunk.Colum
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1180,7 +1180,7 @@ func (b *builtinToBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1196,10 +1196,10 @@ func (b *builtinToBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 			result.AppendNull()
 			continue
 		} else if needEncodeLen > int(b.maxAllowedPacket) {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
-		} else if b.tp.Flen == -1 || b.tp.Flen > mysql.MaxBlobWidth {
+		} else if b.Tp.Flen == -1 || b.Tp.Flen > mysql.MaxBlobWidth {
 			result.AppendNull()
 			continue
 		}
@@ -1226,7 +1226,7 @@ func (b *builtinTrim1ArgSig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1257,7 +1257,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	buf1, err := b.bufAllocator.get(types.ETInt, n)
@@ -1265,7 +1265,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf1)
-	if err := b.args[1].VecEvalInt(b.ctx, input, buf1); err != nil {
+	if err := b.Args[1].VecEvalInt(b.Ctx, input, buf1); err != nil {
 		return err
 	}
 	buf2, err := b.bufAllocator.get(types.ETString, n)
@@ -1273,7 +1273,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		return err
 	}
 	defer b.bufAllocator.put(buf2)
-	if err := b.args[2].VecEvalString(b.ctx, input, buf2); err != nil {
+	if err := b.Args[2].VecEvalString(b.Ctx, input, buf2); err != nil {
 		return err
 	}
 
@@ -1286,7 +1286,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength)*uint64(mysql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -1299,7 +1299,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Column)
 		runeLength := len([]rune(str))
 		padLength := len([]rune(padStr))
 
-		if targetLength < 0 || targetLength*4 > b.tp.Flen || (runeLength < targetLength && padLength == 0) {
+		if targetLength < 0 || targetLength*4 > b.Tp.Flen || (runeLength < targetLength && padLength == 0) {
 			result.AppendNull()
 			continue
 		}
@@ -1331,7 +1331,7 @@ func (b *builtinBinSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1400,7 +1400,7 @@ func (b *builtinFromBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.C
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -1416,7 +1416,7 @@ func (b *builtinFromBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.C
 			result.AppendNull()
 			continue
 		} else if needDecodeLen > int(b.maxAllowedPacket) {
-			b.ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
+			b.Ctx.GetSessionVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}

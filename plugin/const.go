@@ -26,6 +26,8 @@ const (
 	// Daemon indicate a plugin that can run as daemon task.
 	Daemon
 	Engine
+	// UDF indicate a plugin that can add user define func to tidb.
+	UDF
 )
 
 func (k Kind) String() (str string) {
@@ -40,6 +42,8 @@ func (k Kind) String() (str string) {
 		str = "Daemon"
 	case Engine:
 		str = "Engine"
+	case UDF:
+		str = "UDF"
 	}
 	return
 }

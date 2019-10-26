@@ -628,8 +628,8 @@ func ColumnInfos2ColumnsWithDBName(ctx sessionctx.Context, dbName, tblName model
 
 // NewValuesFunc creates a new values function.
 func NewValuesFunc(ctx sessionctx.Context, offset int, retTp *types.FieldType) *ScalarFunction {
-	fc := &valuesFunctionClass{baseFunctionClass{ast.Values, 0, 0}, offset, retTp}
-	bt, err := fc.getFunction(ctx, nil)
+	fc := &valuesFunctionClass{BaseFunctionClass{ast.Values, 0, 0}, offset, retTp}
+	bt, err := fc.GetFunction(ctx, nil)
 	terror.Log(err)
 	return &ScalarFunction{
 		FuncName: model.NewCIStr(ast.Values),
@@ -679,8 +679,8 @@ func wrapWithIsTrue(ctx sessionctx.Context, keepNull bool, arg Expression) (Expr
 	if arg.GetType().EvalType() == types.ETInt {
 		return arg, nil
 	}
-	fc := &isTrueOrFalseFunctionClass{baseFunctionClass{ast.IsTruth, 1, 1}, opcode.IsTruth, keepNull}
-	f, err := fc.getFunction(ctx, []Expression{arg})
+	fc := &isTrueOrFalseFunctionClass{BaseFunctionClass{ast.IsTruth, 1, 1}, opcode.IsTruth, keepNull}
+	f, err := fc.GetFunction(ctx, []Expression{arg})
 	if err != nil {
 		return nil, err
 	}
