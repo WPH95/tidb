@@ -387,11 +387,11 @@ func Shutdown(ctx context.Context) {
 // Get finds and returns plugin by kind and name parameters.
 var TestP map[Kind][]Plugin
 
-func Set(kind Kind, p Plugin) {
+func Set(kind Kind, p *Plugin) {
 	if TestP == nil {
 		TestP = make(map[Kind][]Plugin)
 	}
-	TestP[kind] = append(TestP[kind], p)
+	TestP[kind] = append(TestP[kind], *p)
 }
 
 // Get finds and returns plugin by kind and name parameters.
@@ -414,7 +414,6 @@ func Get(kind Kind, name string) *Plugin {
 	return nil
 }
 
-
 func List(kind Kind) []Plugin {
 	plugins := pluginGlobal.plugins()
 	if plugins == nil {
@@ -426,11 +425,27 @@ func List(kind Kind) []Plugin {
 // ForeachPlugin loops all ready plugins.
 func ForeachPlugin(kind Kind, fn func(plugin *Plugin) error) error {
 	plugins := pluginGlobal.plugins()
+	var pluginsMap map[Kind][]Plugin
 	if plugins == nil {
-		return nil
+		pluginsMap = TestP
+
+		if TestP == nil {
+			return nil
+		}
+	} else {
+		pluginsMap = plugins.plugins
+		for k, v := range TestP {
+			pluginsMap[k] = v
+		}
 	}
-	for i := range plugins.plugins[kind] {
-		p := &plugins.plugins[kind][i]
+
+	var strs []string
+	for _, v := range pluginsMap[UDF] {
+		strs = append(strs, v.Name)
+	}
+	logutil.BgLogger().Info("Fuck PluginsMap", zap.Any("type", kind), zap.Strings("map", strs))
+	for i := range pluginsMap[kind] {
+		p := &pluginsMap[kind][i]
 		if p.State != Ready {
 			continue
 		}

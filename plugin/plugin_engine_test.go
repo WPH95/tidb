@@ -13,7 +13,6 @@ import (
 	"github.com/pingcap/tidb/util/mock"
 	"github.com/pingcap/tidb/util/testkit"
 	"testing"
-	"unsafe"
 )
 
 type baseTestSuite struct {
@@ -72,7 +71,7 @@ func TestPlugin(t *testing.T) {
 
 func (s *testPlugin) TestPlugin(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
-	manifest := plugin.EngineManifest{
+	manifest := &plugin.EngineManifest{
 		Manifest: plugin.Manifest{
 			Name: "csv",
 		},
@@ -80,11 +79,11 @@ func (s *testPlugin) TestPlugin(c *C) {
 		OnReaderNext: plugin.OnReaderNext,
 		//OnReaderClose: plugin.OnReaderClose,
 	}
-	plugin.Set(plugin.Engine, plugin.Plugin{
-		Manifest: (*plugin.Manifest)(unsafe.Pointer(&manifest)),
+	plugin.Set(plugin.Engine, &plugin.Plugin{
+		Manifest: plugin.ExportManifest(manifest),
 		Path:     "",
 		Disabled: 0,
-		State:    0,
+		State:    plugin.Ready,
 	})
 
 	tk.MustExec("use test")
