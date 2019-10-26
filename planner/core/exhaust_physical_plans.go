@@ -16,6 +16,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"github.com/pingcap/tidb/kv"
 	"math"
 
 	"github.com/pingcap/parser/ast"
@@ -668,6 +669,13 @@ func (p *LogicalJoin) constructInnerTableScanTask(
 		KeepOrder:       keepOrder,
 		Desc:            desc,
 	}.Init(ds.ctx, ds.blockOffset)
+
+
+	if ds.tableInfo.Engine == "dashbase" {
+		ts.StoreType = kv.PluginStore
+		ts.PluginStoreType =ds.tableInfo.Engine
+	}
+
 	ts.SetSchema(ds.schema)
 	ts.stats = &property.StatsInfo{
 		// TableScan as inner child of IndexJoin can return at most 1 tuple for each outer row.
@@ -737,6 +745,13 @@ func (p *LogicalJoin) constructInnerIndexScanTask(
 		isPartition:      ds.isPartition,
 		physicalTableID:  ds.physicalTableID,
 	}.Init(ds.ctx, ds.blockOffset)
+	if ds.tableInfo.Engine == "dashbase"{
+		is.StoreType = kv.PluginStore
+		is.PluginStoreType = ds.tableInfo.Engine
+
+	}
+
+
 	is.stats = ds.tableStats.ScaleByExpectCnt(rowCount)
 	cop := &copTask{
 		indexPlan:   is,
@@ -753,6 +768,13 @@ func (p *LogicalJoin) constructInnerIndexScanTask(
 			isPartition:     ds.isPartition,
 			physicalTableID: ds.physicalTableID,
 		}.Init(ds.ctx, ds.blockOffset)
+
+		if ds.tableInfo.Engine == "dashbase" {
+			ts.StoreType = kv.PluginStore
+			ts.PluginStoreType =ds.tableInfo.Engine
+		}
+
+
 		ts.schema = is.dataSourceSchema.Clone()
 		// If inner cop task need keep order, the extraHandleCol should be set.
 		if cop.keepOrder {

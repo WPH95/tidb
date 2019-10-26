@@ -25,6 +25,8 @@ const (
 	Schema
 	// Daemon indicate a plugin that can run as daemon task.
 	Daemon
+	//
+	Engine
 )
 
 func (k Kind) String() (str string) {
@@ -37,6 +39,8 @@ func (k Kind) String() (str string) {
 		str = "Schema"
 	case Daemon:
 		str = "Daemon"
+	case Engine:
+		str = "Engine"
 	}
 	return
 }

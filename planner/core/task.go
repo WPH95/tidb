@@ -570,6 +570,8 @@ func finishCopTask(ctx sessionctx.Context, task task) task {
 			indexPlan:      t.indexPlan,
 			ExtraHandleCol: t.extraHandleCol,
 		}.Init(ctx, t.tablePlan.SelectBlockOffset())
+
+
 		p.stats = t.tablePlan.statsInfo()
 		// Add cost of building table reader executors. Handles are extracted in batch style,
 		// each handle is a range, the CPU cost of building copTasks should be:
@@ -622,6 +624,7 @@ func finishCopTask(ctx sessionctx.Context, task task) task {
 		p := PhysicalTableReader{
 			tablePlan: t.tablePlan,
 			StoreType: ts.StoreType,
+			PluginStoreType: ts.PluginStoreType,
 		}.Init(ctx, t.tablePlan.SelectBlockOffset())
 		p.stats = t.tablePlan.statsInfo()
 		newTask.p = p

@@ -198,6 +198,8 @@ func (b *executorBuilder) build(p plannercore.Plan) Executor {
 		return b.buildAnalyze(v)
 	case *plannercore.PhysicalTableReader:
 		return b.buildTableReader(v)
+	case *plannercore.PhysicalTableScan:
+		return b.buildTableScan(v)
 	case *plannercore.PhysicalIndexReader:
 		return b.buildIndexReader(v)
 	case *plannercore.PhysicalIndexLookUpReader:
@@ -1882,6 +1884,7 @@ func containsLimit(execs []*tipb.Executor) bool {
 }
 
 func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableReader) (*TableReaderExecutor, error) {
+
 	dagReq, streaming, err := b.constructDAGReq(v.TablePlans)
 	if err != nil {
 		return nil, err
@@ -1892,6 +1895,7 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 		pt := tbl.(table.PartitionedTable)
 		tbl = pt.GetPartition(physicalTableID)
 	}
+
 	e := &TableReaderExecutor{
 		baseExecutor:   newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
 		dagPB:          dagReq,
@@ -1905,6 +1909,14 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 		plans:          v.TablePlans,
 		storeType:      v.StoreType,
 	}
+
+	//if ts.Table.Engine == "dashbase" {
+	//	e = &CsvReaderExecutor{
+	//
+	//	}
+	//
+	//}
+
 	if containsLimit(dagReq.Executors) {
 		e.feedback = statistics.NewQueryFeedback(0, nil, 0, ts.Desc)
 	} else {
@@ -1923,16 +1935,35 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 	return e, nil
 }
 
+func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Executor {
+	if v.Table.Name == model.NewCIStr("dashbase0") {
+		return &CsvReaderExecutor{
+			baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		}
+	}
+	return nil
+}
+
 // buildTableReader builds a table reader executor. It first build a no range table reader,
 // and then update it ranges from table scan plan.
-func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) *TableReaderExecutor {
+func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) Executor {
+	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
+	if ts.Table.Name == model.NewCIStr("dashbase0") {
+		if len(v.TablePlans) == 2 {
+			if tSelect, ok:=v.TablePlans[1].(*plannercore.PhysicalSelection);ok{
+				return b.buildSelection(tSelect)
+			}
+
+		}
+		return &CsvReaderExecutor{
+			baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		}
+	}
 	ret, err := buildNoRangeTableReader(b, v)
 	if err != nil {
 		b.err = err
 		return nil
 	}
-
-	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
 	ret.ranges = ts.Ranges
 	sctx := b.ctx.GetSessionVars().StmtCtx
 	sctx.TableIDs = append(sctx.TableIDs, ts.Table.ID)

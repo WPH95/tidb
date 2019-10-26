@@ -235,6 +235,7 @@ const (
 	TiKV StoreType = iota
 	// TiFlash means the type of a store is TiFlash.
 	TiFlash
+	PluginStore
 )
 
 // Request represents a kv request.
@@ -270,6 +271,7 @@ type Request struct {
 	ReplicaRead ReplicaReadType
 	// StoreType represents this request is sent to the which type of store.
 	StoreType StoreType
+	PluginStoreName string
 }
 
 // ResultSubset represents a result subset from a single storage unit.
