@@ -16,7 +16,6 @@ package expression
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/model"
@@ -29,6 +28,8 @@ import (
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/codec"
 	"github.com/pingcap/tidb/util/hack"
+	"github.com/pingcap/tidb/util/logutil"
+	"go.uber.org/zap"
 )
 
 // ScalarFunction is the function that returns a value.
@@ -125,8 +126,22 @@ func newFunctionImpl(ctx sessionctx.Context, fold bool, funcName string, retType
 			return nil, terror.ClassOptimizer.New(mysql.ErrNoDB, mysql.MySQLErrName[mysql.ErrNoDB])
 		}
 
+		var keys []string
+		for k := range funcs {
+			keys = append(keys, k)
+		}
+		logutil.BgLogger().Info("check function fail ",
+			zap.String("check function", funcName),
+			zap.Strings("function name", keys))
+
 		return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", db+"."+funcName)
 	}
+
+	if funcName == "udf_trim" {
+		logutil.BgLogger().Info("check function success ",
+			zap.String("check function", funcName))
+	}
+
 	if !ctx.GetSessionVars().EnableNoopFuncs {
 		if _, ok := noopFuncs[funcName]; ok {
 			return nil, ErrFunctionsNoopImpl.GenWithStackByArgs(funcName)

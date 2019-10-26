@@ -21,6 +21,7 @@
 package expression
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/pingcap/errors"
@@ -739,7 +740,7 @@ func IsFunctionSupported(name string) bool {
 }
 
 func AddUserDefinedFunction(name string, class BuiltinFunc, minArgs int, maxArgs int) {
-	funcs[name] = &UserDefinedFunctionClass{BaseFunctionClass{name, minArgs, maxArgs}}
+	funcs[strings.ToLower(name)] = &UserDefinedFunctionClass{BaseFunctionClass{name, minArgs, maxArgs}}
 	userDefinedFuncs[name] = class
 }
 
