@@ -1,4 +1,4 @@
-name = "csv"
+name = "file"
 kind = "Engine"
 description = "CSV ENGINE"
 version = "1"

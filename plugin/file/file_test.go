@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser"
 	"github.com/pingcap/tidb/domain"
@@ -59,13 +60,6 @@ var _ = Suite(&testPlugin{&baseTestSuite{}})
 type testPlugin struct{ *baseTestSuite }
 
 func TestPlugin(t *testing.T) {
-	//rescueStdout := os.Stdout
-	//_, w, _ := os.Pipe()
-	//os.Stdout = w
-	//
-	//os.Stdout = rescueStdout
-	//
-	//runConf := RunConf{Output: rescueStdout, Verbose: true, KeepWorkDir: true}
 	TestingT(t)
 }
 
@@ -73,7 +67,7 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	manifest := &plugin.EngineManifest{
 		Manifest: plugin.Manifest{
-			Name: "csv",
+			Name: "file",
 		},
 		OnReaderOpen: OnReaderOpen,
 		OnReaderNext: OnReaderNext,
@@ -87,9 +81,14 @@ func (s *testPlugin) TestPlugin(c *C) {
 	})
 
 	tk.MustExec("use test")
-	tk.MustExec("create table t1(a int, b char(255)) ENGINE = csv")
+	tk.MustExec("create table t1(a int, b char(255)) ENGINE = file")
 	result := tk.MustQuery("select * from t1")
 	result.Check(testkit.Rows("0 233333", "1 233333", "2 233333", "3 233333", "4 233333", "5 233333"))
 	result = tk.MustQuery("select * from t1 where a = 2")
 	result.Check(testkit.Rows("2 233333", ))
+	result = tk.MustQuery("show engines")
+	fmt.Println(result.Rows())
+	result = tk.MustQuery("show table status")
+	fmt.Println(result.Rows())
+
 }

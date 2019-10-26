@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"strings"
 
 	"github.com/pingcap/errors"
@@ -941,6 +942,10 @@ func (b *PlanBuilder) buildPhysicalIndexLookUpReader(ctx context.Context, dbName
 		Ranges:           ranger.FullRange(),
 		GenExprs:         genExprsMap,
 	}.Init(b.ctx, b.getSelectOffset())
+	if plugin.HasEngine(tblInfo.Engine) {
+		is.StoreType = kv.PluginEngine
+		is.EngineName = tblInfo.Engine
+	}
 	// There is no alternative plan choices, so just use pseudo stats to avoid panic.
 	is.stats = &property.StatsInfo{HistColl: &(statistics.PseudoTable(tblInfo)).HistColl}
 	// It's double read case.

@@ -1396,9 +1396,11 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 	if engine != "InnoDB" {
 		p = plugin.Get(plugin.Engine, engine)
 		if p == nil {
-			return infoschema.ErrorEngineError.GenWithStackByArgs(404)
+			return infoschema.ErrorEngineError.GenWithStackByArgs("not found engine:'" + engine + "'")
 		}
 		tbInfo.Engine = engine
+	} else {
+		tbInfo.Engine = "InnoDB"
 	}
 
 	tbInfo.State = model.StatePublic

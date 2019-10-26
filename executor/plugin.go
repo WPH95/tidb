@@ -1,6 +1,8 @@
 package executor
 
 import (
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/util/chunk"
@@ -34,3 +36,27 @@ func (e *PluginScanExecutor) Next(ctx context.Context, chk *chunk.Chunk) error {
 func (e *PluginScanExecutor) Close() error {
 	return nil
 }
+
+type PluginInsertExec struct {
+	baseExecutor
+	Plugin  *plugin.Plugin
+	pm      *plugin.EngineManifest
+	InsertE *InsertExec
+	meta    *plugin.ExecutorMeta
+}
+
+func (e *PluginInsertExec) Open(ctx context.Context) error {
+	e.pm = plugin.DeclareEngineManifest(e.Plugin.Manifest)
+	e.meta = &plugin.ExecutorMeta{
+		Table: e.InsertE.Table.Meta(),
+	}
+	e.pm.OnInsertOpen(ctx, e.meta)
+	return nil
+}
+
+
+func (e *PluginInsertExec) Next(ctx context.Context, req *chunk.Chunk) error {
+	return e.pm.OnReaderNext(ctx, e.InsertE.Lists, e.meta)
+}
+
+

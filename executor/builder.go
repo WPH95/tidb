@@ -706,10 +706,20 @@ func (b *executorBuilder) buildInsert(v *plannercore.Insert) Executor {
 	if v.IsReplace {
 		return b.buildReplace(ivs)
 	}
+
 	insert := &InsertExec{
 		InsertValues: ivs,
 		OnDuplicate:  append(v.OnDuplicate, v.GenCols.OnDuplicates...),
 	}
+	if plugin.HasEngine(v.Table.Meta().Engine) {
+		fmt.Println("EXEC")
+		return &PluginInsertExec{
+			InsertE:      insert,
+			baseExecutor: baseExec,
+		}
+
+	}
+	fmt.Println(">>> ERROR")
 	return insert
 }
 
@@ -1928,10 +1938,9 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 
 func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Executor {
 
-	plugin.Get(plugin.Engine, "csv")
 	return &PluginScanExecutor{
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
-		Plugin:       plugin.Get(plugin.Engine, "csv"),
+		Plugin:       plugin.Get(plugin.Engine, v.EngineName),
 		Table:        v.Table,
 		Columns:      v.Columns,
 	}
@@ -1941,9 +1950,9 @@ func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Execu
 // and then update it ranges from table scan plan.
 func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) Executor {
 	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
-	if ts.Table.Engine == "csv" {
+	if plugin.HasEngine(ts.Table.Engine) {
 		if len(v.TablePlans) == 2 {
-			if tSelect, ok:=v.TablePlans[1].(*plannercore.PhysicalSelection);ok{
+			if tSelect, ok := v.TablePlans[1].(*plannercore.PhysicalSelection); ok {
 				return b.buildSelection(tSelect)
 			}
 
