@@ -23,6 +23,12 @@ func DeclareAuditManifest(m *Manifest) *AuditManifest {
 	return (*AuditManifest)(unsafe.Pointer(m))
 }
 
+
+func DeclareEngineManifest(m *Manifest) *EngineManifest{
+	return (*EngineManifest)(unsafe.Pointer(m))
+}
+
+
 // DeclareAuthenticationManifest declares manifest as AuthenticationManifest.
 func DeclareAuthenticationManifest(m *Manifest) *AuthenticationManifest {
 	return (*AuthenticationManifest)(unsafe.Pointer(m))

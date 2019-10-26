@@ -44,23 +44,24 @@ func OnShutdown(ctx context.Context, manifest *plugin.Manifest) error {
 	return nil
 }
 
-func OnReaderOpen(ctx context.Context, meta plugin.ExecutorMeta) {
-	Files[meta.Table.Table.Name.L] = &ReadExecutor{
+func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) {
+	Files[meta.Table.Name.L] = &ReadExecutor{
 		pos: 0,
 	}
 }
 
-func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta plugin.ExecutorMeta) error {
-	if _, ok := Files[meta.Table.Table.Name.L]; !ok {
+func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMeta) error {
+	chk.Reset()
+	if _, ok := Files[meta.Table.Name.L]; !ok {
+		fmt.Println("have some problem")
 		return nil
 	}
-	e := Files[meta.Table.Table.Name.L]
-	chk.Reset()
+	e := Files[meta.Table.Name.L]
 	if e.pos > 5 {
 		return nil
 	}
-	fmt.Println("hello is working")
 	chk.AppendInt64(0, int64(e.pos))
+	chk.AppendString(1, "233333")
 	e.pos += 1
 	return nil
 }

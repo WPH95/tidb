@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"math"
 	"sort"
 	"strings"
@@ -1925,14 +1926,24 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 
 // buildTableReader builds a table reader executor. It first build a no range table reader,
 // and then update it ranges from table scan plan.
-func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) *TableReaderExecutor {
+func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) Executor {
+	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
+	if ts.Table.Engine == "csv" {
+		plugin.Get(plugin.Engine, "csv")
+		return &PluginExecutor{
+			baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+			Plugin:       plugin.Get(plugin.Engine, "csv"),
+			Table:        ts.Table,
+			Columns:      ts.Columns,
+		}
+	}
+
 	ret, err := buildNoRangeTableReader(b, v)
 	if err != nil {
 		b.err = err
 		return nil
 	}
 
-	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
 	ret.ranges = ts.Ranges
 	sctx := b.ctx.GetSessionVars().StmtCtx
 	sctx.TableIDs = append(sctx.TableIDs, ts.Table.ID)
