@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -1370,6 +1371,7 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 		referIdent := ast.Ident{Schema: s.ReferTable.Schema, Name: s.ReferTable.Name}
 		return d.CreateTableWithLike(ctx, ident, referIdent, s.IfNotExists)
 	}
+
 	is := d.GetInfoSchemaWithInterceptor(ctx)
 	schema, ok := is.SchemaByName(ident.Schema)
 	if !ok {
@@ -1388,6 +1390,17 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 	if err != nil {
 		return errors.Trace(err)
 	}
+
+	engine := findTableOption(s.Options, ast.TableOptionEngine, "InnoDB")
+	var p *plugin.Plugin
+	if engine != "InnoDB" {
+		p = plugin.Get(plugin.Engine, engine)
+		if p == nil {
+			return infoschema.ErrorEngineError.GenWithStackByArgs(404)
+		}
+		tbInfo.Engine = engine
+	}
+
 	tbInfo.State = model.StatePublic
 	err = checkTableInfoValid(tbInfo)
 	if err != nil {
@@ -1757,6 +1770,19 @@ func resolveDefaultTableCharsetAndCollation(tbInfo *model.TableInfo, dbCharset s
 		tbInfo.Collate = collate
 	}
 	return
+}
+
+func findTableOption(options []*ast.TableOption, tp ast.TableOptionType, _default string) string {
+	value := _default
+	for i := len(options) - 1; i >= 0; i-- {
+		op := options[i]
+		if op.Tp == tp {
+			// find the last one.
+			value = op.StrValue
+			break
+		}
+	}
+	return value
 }
 
 func findTableOptionCharset(options []*ast.TableOption) string {
