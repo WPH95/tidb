@@ -1,6 +1,11 @@
-package main
+package ip2city
+
+
+// package main
 
 import (
+	"context"
+	"fmt"
 	. "github.com/pingcap/tidb/expression"
 	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/sessionctx"
@@ -9,6 +14,23 @@ import (
 	"strings"
 )
 
+// Validate implements TiDB plugin's Validate SPI.
+func Validate(ctx context.Context, m *plugin.Manifest) error {
+	fmt.Println("udf trim plugin validate")
+	return nil
+}
+
+// OnInit implements TiDB plugin's OnInit SPI.
+func OnInit(ctx context.Context, manifest *plugin.Manifest) error {
+	fmt.Println("udf trim init called")
+	return nil
+}
+
+// OnShutdown implements TiDB plugin's OnShutdown SPI.
+func OnShutdown(ctx context.Context, manifest *plugin.Manifest) error {
+	fmt.Println("udf trim shutdown called")
+	return nil
+}
 
 type TrimFunction struct {
 	BaseBuiltinFunc

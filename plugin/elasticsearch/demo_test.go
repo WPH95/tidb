@@ -10,6 +10,7 @@ import (
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/metrics"
 	"github.com/pingcap/tidb/plugin"
+	"github.com/pingcap/tidb/plugin/ip2city"
 	. "github.com/pingcap/tidb/server"
 	"github.com/pingcap/tidb/session"
 	"github.com/pingcap/tidb/store/mockstore"
@@ -51,11 +52,11 @@ func (ts *TidbTestSuite) SetUpSuite(c *C) {
 			RequireVersion: map[string]uint16{},
 			License:        "",
 			BuildTime:      "2019-10-26 23:41:34.229509 +0800 CST m=+0.001093220",
-			Validate:       Validate,
-			OnInit:         OnInit,
-			OnShutdown:     OnShutdown,
+			Validate:       ip2city.Validate,
+			OnInit:         ip2city.OnInit,
+			OnShutdown:     ip2city.OnShutdown,
 		},
-		GetUserDefinedFuncClass: GetUdfIp2city,
+		GetUserDefinedFuncClass: ip2city.GetUdfIp2city,
 	}
 
 	plugin.Set(plugin.UDF, &plugin.Plugin{
@@ -192,5 +193,5 @@ func (s *testPlugin) TestPlugin(c *C) {
 AS logs ON logs.ip=blacklist.ip`)
 	result.Check(testkit.Rows(
 		`2.0.0.222 3 shanghai.1 SHANGHAI`,
-		`2.0.0.223 3 shanghai.43 SHANGHAI"`))
+		`2.0.0.223 3 shanghai.43 SHANGHAI`))
 }
