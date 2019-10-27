@@ -1400,9 +1400,11 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 		}
 		tbInfo.Engine = engine
 		pm := plugin.DeclareEngineManifest(p.Manifest)
-		err = pm.OnCreateTable(tbInfo)
-		if err != nil {
-			return err
+		if pm.OnCreateTable != nil {
+			err = pm.OnCreateTable(tbInfo)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		tbInfo.Engine = "InnoDB"
@@ -3125,9 +3127,11 @@ func (d *ddl) DropTable(ctx sessionctx.Context, ti ast.Ident) (err error) {
 	if plugin.HasEngine(tb.Meta().Engine) {
 		p := plugin.Get(plugin.Engine, tb.Meta().Engine)
 		pm := plugin.DeclareEngineManifest(p.Manifest)
-		err = pm.OnDropTable(tb.Meta())
-		if err != nil {
-			return err
+		if pm.OnDropTable != nil {
+			err = pm.OnDropTable(tb.Meta())
+			if err != nil {
+				return err
+			}
 		}
 	}
 

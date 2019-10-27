@@ -85,6 +85,8 @@ func (s *testPlugin) TestPlugin(c *C) {
 	})
 
 	tk.MustExec("use test")
+	tk.MustExec("drop table if exists people")
+	tk.MustExec("drop table if exists city")
 	tk.MustExec("create table people(city int, name char(255)) ENGINE = file")
 	tk.MustExec("insert into people values(1, 'lfkdsk')")
 	tk.MustExec("insert into people values(2, 'wph95')")

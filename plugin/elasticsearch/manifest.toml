@@ -1,0 +1,14 @@
+name = "elasticsearch"
+kind = "Engine"
+description = "es support"
+version = "1"
+license = ""
+validate = "Validate"
+onInit = "OnInit"
+onShutdown = "OnShutdown"
+export = [
+    {extPoint="OnSelectReaderOpen", impl="OnSelectReaderOpen"},
+    {extPoint="OnSelectReaderNext", impl="OnSelectReaderNext"},
+    {extPoint="OnReaderOpen", impl="OnReaderOpen"},
+    {extPoint="OnReaderNext", impl="OnReaderNext"},
+]
