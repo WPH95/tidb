@@ -1173,6 +1173,7 @@ func (b *executorBuilder) buildSelection(v *plannercore.PhysicalSelection) Execu
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID(), childExec),
 		filters:      v.Conditions,
 	}
+
 	return e
 }
 
@@ -1938,12 +1939,14 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 
 func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Executor {
 
-	return &PluginScanExecutor{
+	e := &PluginScanExecutor{
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
 		Plugin:       plugin.Get(plugin.Engine, v.EngineName),
 		Table:        v.Table,
 		Columns:      v.Columns,
 	}
+	e.Init()
+	return e
 }
 
 // buildTableReader builds a table reader executor. It first build a no range table reader,
@@ -1952,7 +1955,13 @@ func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) E
 	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
 	if plugin.HasEngine(ts.Table.Engine) {
 		if len(v.TablePlans) == 2 {
+			p := plugin.Get(plugin.Engine, ts.Table.Engine)
+			pm := plugin.DeclareEngineManifest(p.Manifest)
+
 			if tSelect, ok := v.TablePlans[1].(*plannercore.PhysicalSelection); ok {
+				if pm.OnSelectReaderNext != nil {
+					return b.buildReaderWithSelection(tSelect, p, ts)
+				}
 				return b.buildSelection(tSelect)
 			}
 
@@ -1973,6 +1982,15 @@ func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) E
 	return ret
 }
 
+func (b *executorBuilder) buildReaderWithSelection(v *plannercore.PhysicalSelection, p *plugin.Plugin, c *plannercore.PhysicalTableScan) Executor {
+	return &PluginSelectionExec{
+		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		Plugin:       p,
+		filter:       v.Conditions,
+		Table:        c.Table,
+	}
+
+}
 func buildNoRangeIndexReader(b *executorBuilder, v *plannercore.PhysicalIndexReader) (*IndexReaderExecutor, error) {
 	dagReq, streaming, err := b.constructDAGReq(v.IndexPlans)
 	if err != nil {
