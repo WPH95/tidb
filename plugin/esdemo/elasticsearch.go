@@ -125,9 +125,31 @@ func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMe
 }
 
 var SPos = 0
+var Selected []EsDoc
 
-func OnSelectReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
+func OnSelectReaderOpen(ctx context.Context, filters []expression.Expression, meta *plugin.ExecutorMeta) error {
 	SPos = -1
+	Selected = []EsDoc{}
+
+	for _, item := range data {
+		for _, filter := range filters {
+			logutil.BgLogger().Info("filter name", zap.String("name", filter.(*expression.ScalarFunction).FuncName.String()))
+			switch filter.(*expression.ScalarFunction).FuncName {
+			case model.NewCIStr("eq"):
+				var body map[string]interface{}
+				_ = json.Unmarshal([]byte(item.Body), &body)
+				status := strconv.Itoa(int(body["status"].(float64)))
+				if status != "200" {
+					logutil.BgLogger().Info("add chunk", zap.String("body", item.Body))
+					Selected = append(Selected, item)
+				} else {
+					logutil.BgLogger().Info("add chunk filter", zap.String("body", item.Body))
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -148,26 +170,10 @@ func DocsToChk(chk *chunk.Chunk, doc EsDoc, meta *plugin.ExecutorMeta) {
 func OnSelectReaderNext(ctx context.Context, chk *chunk.Chunk, filters []expression.Expression, meta *plugin.ExecutorMeta) error {
 	chk.Reset()
 	SPos += 1
-	if SPos >= len(data) {
+	if SPos >= len(Selected) {
 		return nil
 	}
 
-	for _, filter := range filters {
-		logutil.BgLogger().Info("filter name", zap.String("name", filter.(*expression.ScalarFunction).FuncName.String()))
-		switch filter.(*expression.ScalarFunction).FuncName {
-		case model.NewCIStr("eq"):
-			row := data[SPos]
-			var body map[string]interface{}
-			_ = json.Unmarshal([]byte(row.Body), &body)
-			status := strconv.Itoa(int(body["status"].(float64)))
-			if status == "200" || status == "500" {
-				logutil.BgLogger().Info("add chunk", zap.String("body", row.Body))
-				DocsToChk(chk, data[SPos], meta)
-			} else {
-				logutil.BgLogger().Info("add chunk filter", zap.String("body", row.Body))
-			}
-		}
-	}
-
+	DocsToChk(chk, Selected[SPos], meta)
 	return nil
 }
