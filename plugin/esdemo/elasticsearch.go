@@ -51,17 +51,43 @@ type EsDoc struct {
 	Body string
 }
 
+func NewEsDoc(ip string, status int, id int64) EsDoc {
+	var msg string
+	switch status {
+	case 200:
+		msg = "access web"
+
+	case 401:
+		msg = "unauthorized"
+	case 500:
+		msg = "Server Error"
+
+	default:
+		msg = "UNKNOWN"
+	}
+
+	return EsDoc{
+		Id:   id,
+		Body: fmt.Sprintf(`{"status": %d, "IP": "%s", "message": "ip:%s is %s"}`, status, ip, ip, msg),
+	}
+
+}
+
 var data = []EsDoc{
-	{1, "{'msg': '1.0.0.0 is access web', 'status': 200}"},
-	{2, "{'msg': '1.0.0.0 is unauthorized', 'status': 401}"},
-	{3, "{'msg': '3.0.0.0 is access web', 'status': 200}"},
-	{4, "{'msg': '3.0.0.0 is access web', 'status': 200}"},
-	{5, "{'msg': '3.0.0.0 is access web', 'status': 200}"},
-	{6, "{'msg': '2.0.0.0 is access web', 'status': 200}"},
+	NewEsDoc("1.0.0.0", 200, 1),
+	NewEsDoc("2.0.0.0", 200, 2),
+	NewEsDoc("3.0.0.0", 200, 3),
+	NewEsDoc("3.0.0.0", 401, 4),
+	NewEsDoc("1.0.0.0", 200, 5),
+	NewEsDoc("1.0.0.0", 200, 6),
+	NewEsDoc("2.0.0.0", 200, 7),
+	NewEsDoc("2.0.0.0", 200, 8),
+	NewEsDoc("1.0.0.0", 200, 9),
+	NewEsDoc("1.0.0.0", 200, 10),
 }
 
 var data2 = []EsDoc{
-	{1, "{'msg': '1.0.0.0 is access web'}"},
+	{1, `{"id": "3", "status": 200, "IP": "1.0.0.0"}`},
 	{2, "{'msg': '3.0.0.0 is access web'}"},
 	{4, "{'msg': '2.0.0.0 is access web'}"},
 }
@@ -83,9 +109,9 @@ func OnReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
 }
 
 func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMeta) error {
-	chk.GrowAndReset(2)
+	chk.Reset()
 	pos += 1
-	if pos >= 3 {
+	if pos >= len(data) {
 		return nil
 	}
 	DocsToChk(chk, data[pos], meta)
@@ -100,26 +126,27 @@ func OnSelectReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
 	return nil
 }
 
-func ColumnToChk(chk *chunk.Chunk, schema *expression.Schema, doc EsDoc, name string) {
-	if c := schema.FindColumnByName(name); c != nil {
+func DocsToChk(chk *chunk.Chunk, doc EsDoc, meta *plugin.ExecutorMeta) {
+	schema := meta.Schema
+	if c := schema.FindColumnByName("id"); c != nil {
 		if i := schema.ColumnIndex(c); i != -1 {
 			chk.AppendInt64(c.Index, doc.Id)
 		}
 	}
-}
-
-func DocsToChk(chk *chunk.Chunk, doc EsDoc, meta *plugin.ExecutorMeta) {
-	ColumnToChk(chk, meta.Schema, doc, "id")
-	ColumnToChk(chk, meta.Schema, doc, "body")
+	if c := schema.FindColumnByName("body"); c != nil {
+		if i := schema.ColumnIndex(c); i != -1 {
+			chk.AppendString(c.Index, doc.Body)
+		}
+	}
 }
 
 func OnSelectReaderNext(ctx context.Context, chk *chunk.Chunk, filter []expression.Expression, meta *plugin.ExecutorMeta) error {
+	chk.Reset()
 	SPos += 1
-	if SPos >= 1 {
+	if SPos >= 3 {
 		return nil
 	}
 
-	chk.Reset()
 	DocsToChk(chk, data2[SPos], meta)
 	return nil
 }
