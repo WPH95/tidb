@@ -16,12 +16,17 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/expression"
 	"github.com/pingcap/tidb/plugin"
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/chunk"
+	"github.com/pingcap/tidb/util/logutil"
+	"go.uber.org/zap"
+	"strconv"
 )
 
 var Files = make(map[string]*bufio.Reader)
@@ -74,23 +79,23 @@ func NewEsDoc(ip string, status int, id int64) EsDoc {
 }
 
 var data = []EsDoc{
-	NewEsDoc("1.0.0.0", 200, 1),
-	NewEsDoc("2.0.0.0", 200, 2),
-	NewEsDoc("3.0.0.0", 200, 3),
-	NewEsDoc("3.0.0.0", 401, 4),
-	NewEsDoc("1.0.0.0", 200, 5),
-	NewEsDoc("1.0.0.0", 200, 6),
-	NewEsDoc("2.0.0.0", 200, 7),
-	NewEsDoc("2.0.0.0", 200, 8),
-	NewEsDoc("1.0.0.0", 200, 9),
-	NewEsDoc("1.0.0.0", 200, 10),
+	NewEsDoc("1.0.0.202", 200, 1),
+	NewEsDoc("2.0.0.202", 200, 2),
+	NewEsDoc("3.0.0.202", 200, 3),
+	NewEsDoc("3.0.0.201", 500, 4),
+	NewEsDoc("1.0.0.220", 200, 5),
+	NewEsDoc("1.0.0.221", 200, 6),
+	NewEsDoc("2.0.0.222", 500, 7),
+	NewEsDoc("1.0.0.224", 200, 8),
+	NewEsDoc("1.0.0.225", 200, 9),
+	NewEsDoc("2.0.0.223", 401, 10),
 }
 
-var data2 = []EsDoc{
-	{1, `{"id": "3", "status": 200, "IP": "1.0.0.0"}`},
-	{2, "{'msg': '3.0.0.0 is access web'}"},
-	{4, "{'msg': '2.0.0.0 is access web'}"},
-}
+//var data2 = []EsDoc{
+//	{1, `{"id": "3", "status": 200, "IP": "1.0.0.0"}`},
+//	{2, `{"id": "2", "status": 200, 'msg': '3.0.0.0 is access web'}`},
+//	{4, `{"id": "4", "status": 200, 'msg': '2.0.0.0 is access web'}`},
+//}
 
 func GetSchema() *expression.Schema {
 	var cols []*expression.Column
@@ -120,9 +125,31 @@ func OnReaderNext(ctx context.Context, chk *chunk.Chunk, meta *plugin.ExecutorMe
 }
 
 var SPos = 0
+var Selected []EsDoc
 
-func OnSelectReaderOpen(ctx context.Context, meta *plugin.ExecutorMeta) error {
+func OnSelectReaderOpen(ctx context.Context, filters []expression.Expression, meta *plugin.ExecutorMeta) error {
 	SPos = -1
+	Selected = []EsDoc{}
+
+	for _, item := range data {
+		for _, filter := range filters {
+			logutil.BgLogger().Info("filter name", zap.String("name", filter.(*expression.ScalarFunction).FuncName.String()))
+			switch filter.(*expression.ScalarFunction).FuncName {
+			case model.NewCIStr("eq"):
+				var body map[string]interface{}
+				_ = json.Unmarshal([]byte(item.Body), &body)
+				status := strconv.Itoa(int(body["status"].(float64)))
+				if status != "200" {
+					logutil.BgLogger().Info("add chunk", zap.String("body", item.Body))
+					Selected = append(Selected, item)
+				} else {
+					logutil.BgLogger().Info("add chunk filter", zap.String("body", item.Body))
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -140,13 +167,13 @@ func DocsToChk(chk *chunk.Chunk, doc EsDoc, meta *plugin.ExecutorMeta) {
 	}
 }
 
-func OnSelectReaderNext(ctx context.Context, chk *chunk.Chunk, filter []expression.Expression, meta *plugin.ExecutorMeta) error {
+func OnSelectReaderNext(ctx context.Context, chk *chunk.Chunk, filters []expression.Expression, meta *plugin.ExecutorMeta) error {
 	chk.Reset()
 	SPos += 1
-	if SPos >= 3 {
+	if SPos >= len(Selected) {
 		return nil
 	}
 
-	DocsToChk(chk, data2[SPos], meta)
+	DocsToChk(chk, Selected[SPos], meta)
 	return nil
 }

@@ -90,7 +90,7 @@ func (e *PluginSelectionExec) Open(ctx context.Context) error {
 		Schema: e.baseExecutor.Schema(),
 	}
 	if e.pm.OnSelectReaderOpen != nil {
-		return e.pm.OnSelectReaderOpen(ctx, e.meta)
+		return e.pm.OnSelectReaderOpen(ctx, e.filter, e.meta)
 	}
 	return nil
 }

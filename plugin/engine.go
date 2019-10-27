@@ -18,7 +18,7 @@ type EngineManifest struct {
 	OnReaderClose func(meta ExecutorMeta)
 
 	OnSelectReaderNext func(ctx context.Context, chk *chunk.Chunk, filter []expression.Expression, meta *ExecutorMeta) error
-	OnSelectReaderOpen func(ctx context.Context, meta *ExecutorMeta) error
+	OnSelectReaderOpen func(ctx context.Context, filter []expression.Expression, meta *ExecutorMeta) error
 
 	OnDropTable   func(tb *model.TableInfo) error
 	OnCreateTable func(tb *model.TableInfo) error
