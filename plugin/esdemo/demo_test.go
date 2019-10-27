@@ -167,16 +167,30 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk.MustExec("create table logs(ID int, body text, query text) engine=elasticsearch")
 	//result = tk.MustQuery("select ID from logs")
 	//result.Check(testkit.Rows("1", "2", "3"))
-	result = tk.MustQuery("select body->'$.status' as Status from logs where query='status:200 OR error'")
-	result.Check(testkit.Rows("200", "200", "200", "500", "200", "200", "500", "200", "200", ))
+	result = tk.MustQuery("select body->'$.status' as Status from logs where query='!(status:200) OR error'")
+	result.Check(testkit.Rows("500", "500", "401"))
 
-	//tk.MustExec("drop table if exists blacklist")
-	//tk.MustExec("create table blacklist(ip char(255), level int, message char(255))")
-	//tk.MustExec(`insert into blacklist values("2.0.0.0",1, "shanghai.0")`)
-	//result := tk.MustQuery("select UDF_IP2CITY(ip), ip from blacklist")
-	//result.Check(testkit.Rows("SHANGHAI 2.0.0.0", ))
-	//tk.MustExec(`insert into blacklist values("1.0.0.0",3, "beijing.1"), ("1.0.0.3", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
+	tk.MustExec("drop table if exists blacklist")
+	tk.MustExec("create table blacklist(ip char(255), level int, message char(255))")
+	tk.MustExec(`insert into blacklist values("2.0.0.220", 1, "shanghai.0")`)
+	result = tk.MustQuery("select UDF_IP2CITY(ip), ip from blacklist")
+	result.Check(testkit.Rows("SHANGHAI 2.0.0.220", ))
+	tk.MustExec(`insert into blacklist values("2.0.0.222", 3, "shanghai.1") , ("2.0.0.223", 3, "shanghai.43"), ("1.0.0.220", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
 
-	//result = tk.MustQuery("select body->'$.status' as Status from logs where query='status:200 OR error'")
-	//result.Check(testkit.Rows("1"))
+	result = tk.MustQuery(`SELECT body->'$.IP' as ip FROM logs where query='!(status:200) OR error'`)
+	result.Check(testkit.Rows(`"3.0.0.201"`, `"2.0.0.222"`, `"2.0.0.223"`, ))
+
+	result = tk.MustQuery(`Select * from blacklist`)
+	result.Check(testkit.Rows("2.0.0.220 1 shanghai.0",
+		"2.0.0.222 3 shanghai.1",
+		"2.0.0.223 3 shanghai.43",
+		"1.0.0.220 2 beijing.3",
+		"4.5.6.7 2 "))
+
+	result = tk.MustQuery(`SELECT blacklist.*, UDF_IP2CITY(blacklist.ip) FROM blacklist INNER JOIN 
+(SELECT body->'$.IP' as ip FROM logs where query='!(status:200) OR error') 
+AS logs ON logs.ip=blacklist.ip`)
+	result.Check(testkit.Rows(
+		`2.0.0.222 3 shanghai.1 SHANGHAI`,
+		`2.0.0.223 3 shanghai.43 SHANGHAI"`))
 }
