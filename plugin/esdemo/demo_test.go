@@ -165,9 +165,9 @@ func (s *testPlugin) TestPlugin(c *C) {
 
 	tk.MustExec("use test")
 	tk.MustExec("create table logs(ID int, body text, query text) engine=elasticsearch")
-	result = tk.MustQuery("select ID from logs")
-	result.Check(testkit.Rows("1", "2", "3"))
-	result = tk.MustQuery("select ID from logs where query='status:200 AND error'")
+	//result = tk.MustQuery("select ID from logs")
+	//result.Check(testkit.Rows("1", "2", "3"))
+	result = tk.MustQuery("select body->'$.status' as Status  from logs where query='status:200 OR error'")
 	result.Check(testkit.Rows("1"))
 
 	//tk.MustExec("drop table if exists blacklist")
@@ -176,5 +176,11 @@ func (s *testPlugin) TestPlugin(c *C) {
 	//result := tk.MustQuery("select UDF_IP2CITY(ip), ip from blacklist")
 	//result.Check(testkit.Rows("SHANGHAI 2.0.0.0", ))
 	//tk.MustExec(`insert into blacklist values("1.0.0.0",3, "beijing.1"), ("1.0.0.3", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
+
+
+	result = tk.MustQuery("select body->'$.status' as Status  from logs where query='status:200 OR error'")
+	result.Check(testkit.Rows("1"))
+
+
 
 }
