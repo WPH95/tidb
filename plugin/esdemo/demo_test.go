@@ -69,7 +69,7 @@ func (ts *TidbTestSuite) SetUpSuite(c *C) {
 		Manifest: plugin.Manifest{
 			Name: "elasticsearch",
 		},
-		OnReaderNext:       OnReaderNext,
+		OnReaderNext: OnReaderNext,
 		//GetSchema:          GetSchema,
 		OnReaderOpen:       OnReaderOpen,
 		OnSelectReaderOpen: OnSelectReaderOpen,
@@ -167,8 +167,8 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk.MustExec("create table logs(ID int, body text, query text) engine=elasticsearch")
 	//result = tk.MustQuery("select ID from logs")
 	//result.Check(testkit.Rows("1", "2", "3"))
-	result = tk.MustQuery("select body->'$.status' as Status  from logs where query='status:200 OR error'")
-	result.Check(testkit.Rows("1"))
+	result = tk.MustQuery("select body->'$.status' as Status from logs where query='status:200 OR error'")
+	result.Check(testkit.Rows("200", "200", "200", "500", "200", "200", "500", "200", "200", ))
 
 	//tk.MustExec("drop table if exists blacklist")
 	//tk.MustExec("create table blacklist(ip char(255), level int, message char(255))")
@@ -177,10 +177,6 @@ func (s *testPlugin) TestPlugin(c *C) {
 	//result.Check(testkit.Rows("SHANGHAI 2.0.0.0", ))
 	//tk.MustExec(`insert into blacklist values("1.0.0.0",3, "beijing.1"), ("1.0.0.3", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
 
-
-	result = tk.MustQuery("select body->'$.status' as Status  from logs where query='status:200 OR error'")
-	result.Check(testkit.Rows("1"))
-
-
-
+	//result = tk.MustQuery("select body->'$.status' as Status from logs where query='status:200 OR error'")
+	//result.Check(testkit.Rows("1"))
 }
