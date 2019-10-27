@@ -17,12 +17,18 @@ type EngineManifest struct {
 	OnReaderNext  func(ctx context.Context, chk *chunk.Chunk, meta *ExecutorMeta) error
 	OnReaderClose func(meta ExecutorMeta)
 
+	OnSelectReaderNext func(ctx context.Context, chk *chunk.Chunk, filter []expression.Expression, meta *ExecutorMeta) error
+	OnSelectReaderOpen func(ctx context.Context, filter []expression.Expression, meta *ExecutorMeta) error
+
 	OnDropTable   func(tb *model.TableInfo) error
 	OnCreateTable func(tb *model.TableInfo) error
+
+	GetSchema func() *expression.Schema
 }
 
 type ExecutorMeta struct {
-	Table *model.TableInfo
+	Table  *model.TableInfo
+	Schema *expression.Schema
 }
 
 func HasEngine(name string) bool {
