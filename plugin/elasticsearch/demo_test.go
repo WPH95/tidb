@@ -176,7 +176,7 @@ func (s *testPlugin) TestPlugin(c *C) {
 	tk.MustExec(`insert into blacklist values("2.0.0.220", 1, "shanghai.0")`)
 	result = tk.MustQuery("select UDF_IP2CITY(ip), ip from blacklist")
 	result.Check(testkit.Rows("SHANGHAI 2.0.0.220", ))
-	tk.MustExec(`insert into blacklist values("2.0.0.222", 3, "shanghai.1") , ("2.0.0.223", 3, "shanghai.43"), ("1.0.0.220", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
+	tk.MustExec(`insert into blacklist values("2.0.0.222", 3, "ip: 2.0.0.222 此 ip 高危 ") , ("2.0.0.223", 3, "2.0.0.223: 此 ip 高危 "), ("1.0.0.220", 2, "beijing.3"), ("4.5.6.7", 2, "")`)
 
 	result = tk.MustQuery(`SELECT body->'$.IP' as ip FROM logs where query='!(status:200) OR error'`)
 	result.Check(testkit.Rows(`"3.0.0.201"`, `"2.0.0.222"`, `"2.0.0.223"`, ))
