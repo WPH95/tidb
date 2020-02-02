@@ -689,7 +689,7 @@ func benchmarkVectorizedEvalOneVec(b *testing.B, vecExprCases vecExprBenchCases)
 	}
 }
 
-func genVecBuiltinFuncBenchCase(ctx sessionctx.Context, funcName string, testCase vecExprBenchCase) (baseFunc builtinFunc, fts []*types.FieldType, input *chunk.Chunk, result *chunk.Column) {
+func genVecBuiltinFuncBenchCase(ctx sessionctx.Context, funcName string, testCase vecExprBenchCase) (baseFunc BuiltinFunc, fts []*types.FieldType, input *chunk.Chunk, result *chunk.Column) {
 	childrenNumber := len(testCase.childrenTypes)
 	fts = make([]*types.FieldType, childrenNumber)
 	for i := range fts {
@@ -711,27 +711,27 @@ func genVecBuiltinFuncBenchCase(ctx sessionctx.Context, funcName string, testCas
 
 	var err error
 	if funcName == ast.Cast {
-		var fc functionClass
+		var fc FunctionClass
 		tp := eType2FieldType(testCase.retEvalType)
 		switch testCase.retEvalType {
 		case types.ETInt:
-			fc = &castAsIntFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsIntFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETDecimal:
-			fc = &castAsDecimalFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsDecimalFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETReal:
-			fc = &castAsRealFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsRealFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETDatetime, types.ETTimestamp:
-			fc = &castAsTimeFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsTimeFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETDuration:
-			fc = &castAsDurationFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsDurationFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETJson:
-			fc = &castAsJSONFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsJSONFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETString:
-			fc = &castAsStringFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
+			fc = &castAsStringFunctionClass{BaseFunctionClass{ast.Cast, 1, 1}, tp}
 		}
-		baseFunc, err = fc.getFunction(ctx, cols)
+		baseFunc, err = fc.GetFunction(ctx, cols)
 	} else {
-		baseFunc, err = funcs[funcName].getFunction(ctx, cols)
+		baseFunc, err = funcs[funcName].GetFunction(ctx, cols)
 	}
 	if err != nil {
 		panic(err)
@@ -896,7 +896,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(getColumnLen(output, testCase.retEvalType), Equals, input.NumRows())
 				vecWarnCnt = ctx.GetSessionVars().StmtCtx.WarningCount()
 				for row := it.Begin(); row != it.End(); row = it.Next() {
-					val, isNull, err := baseFunc.evalString(row)
+					val, isNull, err := baseFunc.EvalString(row)
 					c.Assert(err, IsNil)
 					c.Assert(isNull, Equals, output.IsNull(i), commentf(i))
 					if !isNull {
@@ -1087,7 +1087,7 @@ func benchmarkVectorizedBuiltinFunc(b *testing.B, vecExprCases vecExprBenchCases
 					for i := 0; i < b.N; i++ {
 						output.Reset()
 						for row := it.Begin(); row != it.End(); row = it.Next() {
-							v, isNull, err := baseFunc.evalString(row)
+							v, isNull, err := baseFunc.EvalString(row)
 							if err != nil {
 								b.Fatal(err)
 							}

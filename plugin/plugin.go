@@ -24,7 +24,6 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/pingcap/errors"
-	"github.com/pingcap/tidb/domain"
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/util"
 	"github.com/pingcap/tidb/util/logutil"
@@ -386,27 +385,67 @@ func Shutdown(ctx context.Context) {
 }
 
 // Get finds and returns plugin by kind and name parameters.
+var TestP map[Kind][]Plugin
+
+func Set(kind Kind, p *Plugin) {
+	if TestP == nil {
+		TestP = make(map[Kind][]Plugin)
+	}
+	TestP[kind] = append(TestP[kind], *p)
+}
+
+// Get finds and returns plugin by kind and name parameters.
 func Get(kind Kind, name string) *Plugin {
 	plugins := pluginGlobal.plugins()
-	if plugins == nil {
-		return nil
+	if plugins != nil {
+		for _, p := range plugins.plugins[kind] {
+			if p.Name == name {
+				return &p
+			}
+		}
 	}
-	for _, p := range plugins.plugins[kind] {
+
+	for _, p := range TestP[kind] {
 		if p.Name == name {
 			return &p
 		}
 	}
+
 	return nil
+}
+
+func List(kind Kind) []Plugin {
+	plugins := pluginGlobal.plugins()
+	if plugins == nil {
+		return nil
+	}
+	return plugins.plugins[kind]
 }
 
 // ForeachPlugin loops all ready plugins.
 func ForeachPlugin(kind Kind, fn func(plugin *Plugin) error) error {
 	plugins := pluginGlobal.plugins()
+	var pluginsMap map[Kind][]Plugin
 	if plugins == nil {
-		return nil
+		pluginsMap = TestP
+
+		if TestP == nil {
+			return nil
+		}
+	} else {
+		pluginsMap = plugins.plugins
+		for k, v := range TestP {
+			pluginsMap[k] = v
+		}
 	}
-	for i := range plugins.plugins[kind] {
-		p := &plugins.plugins[kind][i]
+
+	var strs []string
+	for _, v := range pluginsMap[UDF] {
+		strs = append(strs, v.Name)
+	}
+	logutil.BgLogger().Info("Fuck PluginsMap", zap.Any("type", kind), zap.Strings("map", strs))
+	for i := range pluginsMap[kind] {
+		p := &pluginsMap[kind][i]
 		if p.State != Ready {
 			continue
 		}
@@ -443,37 +482,6 @@ func GetAll() map[Kind][]Plugin {
 		return nil
 	}
 	return plugins.plugins
-}
-
-// NotifyFlush notify plugins to do flush logic.
-func NotifyFlush(dom *domain.Domain, pluginName string) error {
-	p := getByName(pluginName)
-	if p == nil || p.Manifest.flushWatcher == nil || p.State != Ready {
-		return errors.Errorf("plugin %s doesn't exists or unsupported flush or doesn't start with PD", pluginName)
-	}
-	_, err := dom.GetEtcdClient().KV.Put(context.Background(), p.Manifest.flushWatcher.path, strconv.Itoa(int(p.Disabled)))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// ChangeDisableFlagAndFlush changes plugin disable flag and notify other nodes to do same change.
-func ChangeDisableFlagAndFlush(dom *domain.Domain, pluginName string, disable bool) error {
-	p := getByName(pluginName)
-	if p == nil || p.Manifest.flushWatcher == nil || p.State != Ready {
-		return errors.Errorf("plugin %s doesn't exists or unsupported flush or doesn't start with PD", pluginName)
-	}
-	disableInt := uint32(0)
-	if disable {
-		disableInt = 1
-	}
-	atomic.StoreUint32(&p.Disabled, disableInt)
-	_, err := dom.GetEtcdClient().KV.Put(context.Background(), p.Manifest.flushWatcher.path, strconv.Itoa(int(disableInt)))
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func getByName(pluginName string) *Plugin {

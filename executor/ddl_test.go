@@ -16,11 +16,6 @@ package executor_test
 import (
 	"context"
 	"fmt"
-	"math"
-	"strconv"
-	"strings"
-	"time"
-
 	. "github.com/pingcap/check"
 	"github.com/pingcap/failpoint"
 	"github.com/pingcap/parser/model"
@@ -41,6 +36,10 @@ import (
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/testkit"
 	"github.com/pingcap/tidb/util/testutil"
+	"math"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func (s *testSuite6) TestTruncateTable(c *C) {
@@ -1005,3 +1004,4 @@ func (s *testSuite6) TestTimestampMinDefaultValue(c *C) {
 	tk.MustExec("create table tdv(a int);")
 	tk.MustExec("ALTER TABLE tdv ADD COLUMN ts timestamp DEFAULT '1970-01-01 08:00:01';")
 }
+

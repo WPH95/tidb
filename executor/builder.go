@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"math"
 	"sort"
 	"strings"
@@ -208,6 +209,8 @@ func (b *executorBuilder) build(p plannercore.Plan) Executor {
 		return b.buildSQLBindExec(v)
 	case *plannercore.SplitRegion:
 		return b.buildSplitRegion(v)
+	case *plannercore.PhysicalTableScan:
+		return b.buildTableScan(v)
 	default:
 		if mp, ok := p.(MockPhysicalPlan); ok {
 			return mp.GetExecutor()
@@ -703,9 +706,19 @@ func (b *executorBuilder) buildInsert(v *plannercore.Insert) Executor {
 	if v.IsReplace {
 		return b.buildReplace(ivs)
 	}
+
 	insert := &InsertExec{
 		InsertValues: ivs,
 		OnDuplicate:  append(v.OnDuplicate, v.GenCols.OnDuplicates...),
+	}
+	fmt.Println(">>>>>", v.Table.Meta().Engine, v.Table.Meta().Name.String())
+	if plugin.HasEngine(v.Table.Meta().Engine) {
+		return &PluginInsertExec{
+			Plugin:       plugin.Get(plugin.Engine, v.Table.Meta().Engine),
+			InsertE:      insert,
+			baseExecutor: baseExec,
+		}
+
 	}
 	return insert
 }
@@ -1160,6 +1173,7 @@ func (b *executorBuilder) buildSelection(v *plannercore.PhysicalSelection) Execu
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID(), childExec),
 		filters:      v.Conditions,
 	}
+
 	return e
 }
 
@@ -1923,22 +1937,60 @@ func buildNoRangeTableReader(b *executorBuilder, v *plannercore.PhysicalTableRea
 	return e, nil
 }
 
+func (b *executorBuilder) buildTableScan(v *plannercore.PhysicalTableScan) Executor {
+
+	e := &PluginScanExecutor{
+		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		Plugin:       plugin.Get(plugin.Engine, v.EngineName),
+		Table:        v.Table,
+		Columns:      v.Columns,
+	}
+	e.Init()
+	return e
+}
+
 // buildTableReader builds a table reader executor. It first build a no range table reader,
 // and then update it ranges from table scan plan.
-func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) *TableReaderExecutor {
+func (b *executorBuilder) buildTableReader(v *plannercore.PhysicalTableReader) Executor {
+	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
+	if plugin.HasEngine(ts.Table.Engine) {
+		if len(v.TablePlans) == 2 {
+			p := plugin.Get(plugin.Engine, ts.Table.Engine)
+			pm := plugin.DeclareEngineManifest(p.Manifest)
+
+			if tSelect, ok := v.TablePlans[1].(*plannercore.PhysicalSelection); ok {
+				if pm.OnSelectReaderNext != nil {
+					return b.buildReaderWithSelection(tSelect, p, ts)
+				}
+				return b.buildSelection(tSelect)
+			}
+
+		}
+
+		return b.buildTableScan(ts)
+	}
+
 	ret, err := buildNoRangeTableReader(b, v)
 	if err != nil {
 		b.err = err
 		return nil
 	}
 
-	ts := v.TablePlans[0].(*plannercore.PhysicalTableScan)
 	ret.ranges = ts.Ranges
 	sctx := b.ctx.GetSessionVars().StmtCtx
 	sctx.TableIDs = append(sctx.TableIDs, ts.Table.ID)
 	return ret
 }
 
+func (b *executorBuilder) buildReaderWithSelection(v *plannercore.PhysicalSelection, p *plugin.Plugin, c *plannercore.PhysicalTableScan) Executor {
+	return &PluginSelectionExec{
+		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ExplainID()),
+		Plugin:       p,
+		filter:       v.Conditions,
+		Table:        c.Table,
+	}
+
+}
 func buildNoRangeIndexReader(b *executorBuilder, v *plannercore.PhysicalIndexReader) (*IndexReaderExecutor, error) {
 	dagReq, streaming, err := b.constructDAGReq(v.IndexPlans)
 	if err != nil {

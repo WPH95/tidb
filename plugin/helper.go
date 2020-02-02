@@ -23,6 +23,12 @@ func DeclareAuditManifest(m *Manifest) *AuditManifest {
 	return (*AuditManifest)(unsafe.Pointer(m))
 }
 
+
+func DeclareEngineManifest(m *Manifest) *EngineManifest{
+	return (*EngineManifest)(unsafe.Pointer(m))
+}
+
+
 // DeclareAuthenticationManifest declares manifest as AuthenticationManifest.
 func DeclareAuthenticationManifest(m *Manifest) *AuthenticationManifest {
 	return (*AuthenticationManifest)(unsafe.Pointer(m))
@@ -36,6 +42,10 @@ func DeclareSchemaManifest(m *Manifest) *SchemaManifest {
 // DeclareDaemonManifest declares manifest as DaemonManifest.
 func DeclareDaemonManifest(m *Manifest) *DaemonManifest {
 	return (*DaemonManifest)(unsafe.Pointer(m))
+}
+
+func DeclareUDFManifest(m *Manifest) *UDFManifest {
+	return (*UDFManifest)(unsafe.Pointer(m))
 }
 
 // ID present plugin identity.

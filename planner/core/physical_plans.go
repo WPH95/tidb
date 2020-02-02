@@ -65,6 +65,7 @@ type PhysicalTableReader struct {
 
 	// StoreType indicates table read from which type of store.
 	StoreType kv.StoreType
+	EngineName string
 }
 
 // GetPhysicalReader returns PhysicalTableReader for logical TableGather.
@@ -166,6 +167,8 @@ type PhysicalIndexScan struct {
 	// DoubleRead means if the index executor will read kv two times.
 	// If the query requires the columns that don't belong to index, DoubleRead will be true.
 	DoubleRead bool
+	StoreType kv.StoreType
+	EngineName string
 }
 
 // PhysicalMemTable reads memory table.
@@ -206,6 +209,8 @@ type PhysicalTableScan struct {
 	HandleIdx int
 
 	StoreType kv.StoreType
+	EngineName string
+
 
 	// The table scan may be a partition, rather than a real table.
 	isPartition bool

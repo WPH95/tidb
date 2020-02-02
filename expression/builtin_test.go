@@ -26,7 +26,7 @@ import (
 	"github.com/pingcap/tidb/util/chunk"
 )
 
-func evalBuiltinFunc(f builtinFunc, row chunk.Row) (d types.Datum, err error) {
+func evalBuiltinFunc(f BuiltinFunc, row chunk.Row) (d types.Datum, err error) {
 	var (
 		res    interface{}
 		isNull bool
@@ -51,7 +51,7 @@ func evalBuiltinFunc(f builtinFunc, row chunk.Row) (d types.Datum, err error) {
 	case types.ETJson:
 		res, isNull, err = f.evalJSON(row)
 	case types.ETString:
-		res, isNull, err = f.evalString(row)
+		res, isNull, err = f.EvalString(row)
 	}
 
 	if isNull || err != nil {
@@ -99,13 +99,13 @@ func makeDatums(i interface{}) []types.Datum {
 
 func (s *testEvaluatorSuite) TestIsNullFunc(c *C) {
 	fc := funcs[ast.IsNull]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(1)))
+	f, err := fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(1)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetInt64(), Equals, int64(0))
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
+	f, err = fc.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -114,14 +114,14 @@ func (s *testEvaluatorSuite) TestIsNullFunc(c *C) {
 
 func (s *testEvaluatorSuite) TestLock(c *C) {
 	lock := funcs[ast.GetLock]
-	f, err := lock.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil, 1)))
+	f, err := lock.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(nil, 1)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetInt64(), Equals, int64(1))
 
 	releaseLock := funcs[ast.ReleaseLock]
-	f, err = releaseLock.getFunction(s.ctx, s.datumsToConstants(types.MakeDatums(1)))
+	f, err = releaseLock.GetFunction(s.ctx, s.datumsToConstants(types.MakeDatums(1)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -137,7 +137,7 @@ func newFunctionForTest(ctx sessionctx.Context, funcName string, args ...Express
 	}
 	funcArgs := make([]Expression, len(args))
 	copy(funcArgs, args)
-	f, err := fc.getFunction(ctx, funcArgs)
+	f, err := fc.GetFunction(ctx, funcArgs)
 	if err != nil {
 		return nil, err
 	}

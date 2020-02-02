@@ -3826,9 +3826,9 @@ func (s *testSuite) TestSelectView(c *C) {
 	tk.MustExec("drop table view_t;")
 	tk.MustExec("create table view_t(c int,d int)")
 	err := tk.ExecToErr("select * from view1")
-	c.Assert(err.Error(), Equals, "[planner:1356]View 'test.view1' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them")
+	c.Assert(err.Error(), Equals, "[planner:1054]Unknown column 'test.view_t.a' in 'field list'")
 	err = tk.ExecToErr("select * from view2")
-	c.Assert(err.Error(), Equals, "[planner:1356]View 'test.view2' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them")
+	c.Assert(err.Error(), Equals, "[planner:1054]Unknown column 'test.view_t.a' in 'field list'")
 	err = tk.ExecToErr("select * from view3")
 	c.Assert(err.Error(), Equals, plannercore.ErrViewInvalid.GenWithStackByArgs("test", "view3").Error())
 	tk.MustExec("drop table view_t;")
@@ -3948,9 +3948,7 @@ func (s *testSuite6) TearDownTest(c *C) {
 	}
 }
 
-type testSuite7 struct {
-	*baseTestSuite
-}
+
 
 func (s *testSuite7) TearDownTest(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
@@ -5052,4 +5050,8 @@ func (s *testSuiteP2) TestPointUpdatePreparedPlanWithCommitMode(c *C) {
 	tk1.MustExec("commit")
 
 	tk2.MustQuery("select * from t where a = 3").Check(testkit.Rows("3 3 11"))
+}
+
+type testSuite7 struct {
+	*baseTestSuite
 }

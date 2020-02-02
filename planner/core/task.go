@@ -16,7 +16,6 @@ package core
 import (
 	"fmt"
 	"math"
-
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/charset"
 	"github.com/pingcap/parser/model"
@@ -622,6 +621,7 @@ func finishCopTask(ctx sessionctx.Context, task task) task {
 		p := PhysicalTableReader{
 			tablePlan: t.tablePlan,
 			StoreType: ts.StoreType,
+			EngineName: ts.EngineName,
 		}.Init(ctx, t.tablePlan.SelectBlockOffset())
 		p.stats = t.tablePlan.statsInfo()
 		newTask.p = p

@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pingcap/tidb/plugin"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -1370,6 +1371,7 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 		referIdent := ast.Ident{Schema: s.ReferTable.Schema, Name: s.ReferTable.Name}
 		return d.CreateTableWithLike(ctx, ident, referIdent, s.IfNotExists)
 	}
+
 	is := d.GetInfoSchemaWithInterceptor(ctx)
 	schema, ok := is.SchemaByName(ident.Schema)
 	if !ok {
@@ -1388,6 +1390,26 @@ func (d *ddl) CreateTable(ctx sessionctx.Context, s *ast.CreateTableStmt) (err e
 	if err != nil {
 		return errors.Trace(err)
 	}
+
+	engine := findTableOption(s.Options, ast.TableOptionEngine, "InnoDB")
+	var p *plugin.Plugin
+	if engine != "InnoDB" {
+		p = plugin.Get(plugin.Engine, engine)
+		if p == nil {
+			return infoschema.ErrorEngineError.GenWithStackByArgs("not found engine:'" + engine + "'")
+		}
+		tbInfo.Engine = engine
+		pm := plugin.DeclareEngineManifest(p.Manifest)
+		if pm.OnCreateTable != nil {
+			err = pm.OnCreateTable(tbInfo)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		tbInfo.Engine = "InnoDB"
+	}
+
 	tbInfo.State = model.StatePublic
 	err = checkTableInfoValid(tbInfo)
 	if err != nil {
@@ -1757,6 +1779,19 @@ func resolveDefaultTableCharsetAndCollation(tbInfo *model.TableInfo, dbCharset s
 		tbInfo.Collate = collate
 	}
 	return
+}
+
+func findTableOption(options []*ast.TableOption, tp ast.TableOptionType, _default string) string {
+	value := _default
+	for i := len(options) - 1; i >= 0; i-- {
+		op := options[i]
+		if op.Tp == tp {
+			// find the last one.
+			value = op.StrValue
+			break
+		}
+	}
+	return value
 }
 
 func findTableOptionCharset(options []*ast.TableOption) string {
@@ -3087,6 +3122,17 @@ func (d *ddl) DropTable(ctx sessionctx.Context, ti ast.Ident) (err error) {
 	schema, tb, err := d.getSchemaAndTableByIdent(ctx, ti)
 	if err != nil {
 		return errors.Trace(err)
+	}
+
+	if plugin.HasEngine(tb.Meta().Engine) {
+		p := plugin.Get(plugin.Engine, tb.Meta().Engine)
+		pm := plugin.DeclareEngineManifest(p.Manifest)
+		if pm.OnDropTable != nil {
+			err = pm.OnDropTable(tb.Meta())
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	job := &model.Job{

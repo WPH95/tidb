@@ -104,8 +104,11 @@ func (c *Column) Reset() {
 
 // IsNull returns if this row is null.
 func (c *Column) IsNull(rowIdx int) bool {
-	nullByte := c.nullBitmap[rowIdx/8]
-	return nullByte&(1<<(uint(rowIdx)&7)) == 0
+	if (rowIdx/8) < len(c.nullBitmap){
+		nullByte := c.nullBitmap[rowIdx/8]
+		return nullByte&(1<<(uint(rowIdx)&7)) == 0
+	}
+	return true
 }
 
 // CopyConstruct copies this Column to dst.

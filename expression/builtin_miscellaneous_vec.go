@@ -31,7 +31,7 @@ func (b *builtinInetNtoaSig) vecEvalString(input *chunk.Chunk, result *chunk.Col
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalInt(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalInt(b.Ctx, input, buf); err != nil {
 		return err
 	}
 
@@ -67,7 +67,7 @@ func (b *builtinIsIPv4Sig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) 
 		return err
 	}
 	defer b.bufAllocator.put(buf)
-	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
+	if err := b.Args[0].VecEvalString(b.Ctx, input, buf); err != nil {
 		return err
 	}
 	result.ResizeInt64(n, false)
@@ -94,7 +94,7 @@ func (b *builtinJSONAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinJSONAnyValueSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalJSON(b.ctx, input, result)
+	return b.Args[0].VecEvalJSON(b.Ctx, input, result)
 }
 
 func (b *builtinRealAnyValueSig) vectorized() bool {
@@ -102,7 +102,7 @@ func (b *builtinRealAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinRealAnyValueSig) vecEvalReal(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalReal(b.ctx, input, result)
+	return b.Args[0].VecEvalReal(b.Ctx, input, result)
 }
 
 func (b *builtinStringAnyValueSig) vectorized() bool {
@@ -110,7 +110,7 @@ func (b *builtinStringAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinStringAnyValueSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalString(b.ctx, input, result)
+	return b.Args[0].VecEvalString(b.Ctx, input, result)
 }
 
 func (b *builtinIsIPv6Sig) vectorized() bool {
@@ -126,7 +126,7 @@ func (b *builtinNameConstStringSig) vectorized() bool {
 }
 
 func (b *builtinNameConstStringSig) vecEvalString(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[1].VecEvalString(b.ctx, input, result)
+	return b.Args[1].VecEvalString(b.Ctx, input, result)
 }
 
 func (b *builtinDecimalAnyValueSig) vectorized() bool {
@@ -161,7 +161,7 @@ func (b *builtinNameConstDurationSig) vectorized() bool {
 }
 
 func (b *builtinNameConstDurationSig) vecEvalDuration(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[1].VecEvalDuration(b.ctx, input, result)
+	return b.Args[1].VecEvalDuration(b.Ctx, input, result)
 }
 
 func (b *builtinLockSig) vectorized() bool {
@@ -177,7 +177,7 @@ func (b *builtinDurationAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinDurationAnyValueSig) vecEvalDuration(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalDuration(b.ctx, input, result)
+	return b.Args[0].VecEvalDuration(b.Ctx, input, result)
 }
 
 func (b *builtinIntAnyValueSig) vectorized() bool {
@@ -185,7 +185,7 @@ func (b *builtinIntAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinIntAnyValueSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalInt(b.ctx, input, result)
+	return b.Args[0].VecEvalInt(b.Ctx, input, result)
 }
 
 func (b *builtinIsIPv4CompatSig) vectorized() bool {
@@ -209,7 +209,7 @@ func (b *builtinNameConstTimeSig) vectorized() bool {
 }
 
 func (b *builtinNameConstTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[1].VecEvalTime(b.ctx, input, result)
+	return b.Args[1].VecEvalTime(b.Ctx, input, result)
 }
 
 func (b *builtinSleepSig) vectorized() bool {
@@ -257,7 +257,7 @@ func (b *builtinTimeAnyValueSig) vectorized() bool {
 }
 
 func (b *builtinTimeAnyValueSig) vecEvalTime(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[0].VecEvalTime(b.ctx, input, result)
+	return b.Args[0].VecEvalTime(b.Ctx, input, result)
 }
 
 func (b *builtinInetAtonSig) vectorized() bool {
@@ -281,7 +281,7 @@ func (b *builtinNameConstRealSig) vectorized() bool {
 }
 
 func (b *builtinNameConstRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.Column) error {
-	return b.args[1].VecEvalReal(b.ctx, input, result)
+	return b.Args[1].VecEvalReal(b.Ctx, input, result)
 }
 
 func (b *builtinReleaseLockSig) vectorized() bool {
